@@ -5,7 +5,7 @@ import Dashboard from "./Dashboard";
 import MainHub from "./MainHub";
 import ArchitecturePage from "./ArchitecturePage";
 import Header from "./Header";
-
+ 
 const styles = {
   page: {
     display: 'flex',
