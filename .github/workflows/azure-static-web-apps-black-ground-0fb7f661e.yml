@@ -39,19 +39,20 @@ jobs:
           test -f build/index.html
 
       - name: Deploy to Azure Static Web Apps (skip Oryx)
-        uses: Azure/static-web-apps-deploy@v2
+        uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_GROUND_0FB7F661E }}
           action: upload
           skip_app_build: true
-          app_artifact_location: build   # aquí está tu index.html
+          app_location: build    # <-- carpeta final con index.html
+          # NO pongas output_location aquí
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Close Pull Request
-        uses: Azure/static-web-apps-deploy@v2
+        uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_GROUND_0FB7F661E }}
           action: close
