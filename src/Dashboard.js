@@ -258,31 +258,29 @@ function Dashboard() {
   }
 
   // Función simple para cargar datos iniciales
-  async function loadInitialData() {
-    if (!accounts || accounts.length === 0) return;
+  const loadInitialData = useCallback(async () => {
+  if (!accounts || accounts.length === 0) return;
+  
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const request = { ...loginRequest, account: accounts[0] };
+    const tokenResponse = await instance.acquireTokenSilent(request);
     
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const request = { ...loginRequest, account: accounts[0] };
-      const tokenResponse = await instance.acquireTokenSilent(request);
-      
-      // Guardar info del usuario
-      setUserInfo({
-        name: tokenResponse.account.name || tokenResponse.account.username,
-        id: tokenResponse.account.localAccountId
-      });
+    setUserInfo({
+      name: tokenResponse.account.name || tokenResponse.account.username,
+      id: tokenResponse.account.localAccountId
+    });
 
-      // Cargar transacciones
-      await fetchTransactions(tokenResponse.accessToken);
-    } catch (err) {
-      console.error("Error al cargar datos:", err);
-      setError("Error al cargar los datos iniciales.");
-    } finally {
-      setLoading(false);
-    }
+    await fetchTransactions(tokenResponse.accessToken);
+  } catch (err) {
+    console.error("Error al cargar datos:", err);
+    setError("Error al cargar los datos iniciales.");
+  } finally {
+    setLoading(false);
   }
+}, [accounts, instance, loginRequest]);
 
   // Cargar datos al inicio
   useEffect(() => {
