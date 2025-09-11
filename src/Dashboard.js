@@ -280,7 +280,7 @@ function Dashboard() {
   } finally {
     setLoading(false);
   }
-}, [accounts, instance, loginRequest]);
+}, [accounts, instance]); 
 
   // Cargar datos al inicio
   useEffect(() => {
