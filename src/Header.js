@@ -33,12 +33,15 @@ const headerStyles = {
     gap: '30px',
     alignItems: 'center'
   },
-  navLink: {
+  navButton: {
     color: 'rgba(255, 255, 255, 0.8)',
-    textDecoration: 'none',
+    background: 'none',
+    border: 'none',
     fontWeight: 500,
+    fontSize: '16px',
     transition: 'color 0.3s ease',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    fontFamily: 'inherit'
   },
   button: {
     padding: '10px 20px',
@@ -77,15 +80,15 @@ function Header({ type, onNavigate, onLogin, onLogout, userName }) {
             FINTECH PRO
           </div>
           <div style={headerStyles.navLinks}>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('hub')}>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('hub')}>
               Servicios
-            </a>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('architecture')}>
+            </button>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('architecture')}>
               Arquitectura
-            </a>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('hub')}>
+            </button>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('hub')}>
               Casos de Éxito
-            </a>
+            </button>
             <button style={headerStyles.button} onClick={onLogin}>
               Acceder al Sistema
             </button>
@@ -104,15 +107,15 @@ function Header({ type, onNavigate, onLogin, onLogout, userName }) {
             FINTECH PRO
           </div>
           <div style={headerStyles.navLinks}>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('dashboard')}>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('dashboard')}>
               Dashboard
-            </a>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('architecture')}>
+            </button>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('architecture')}>
               Arquitectura
-            </a>
-            <a style={headerStyles.navLink} onClick={() => onNavigate('admin')}>
+            </button>
+            <button style={headerStyles.navButton} onClick={() => onNavigate('admin')}>
               Admin
-            </a>
+            </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                 Hola, <span style={{ color: '#A98B51', fontWeight: 600 }}>{userName}</span>

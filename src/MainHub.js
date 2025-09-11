@@ -185,11 +185,15 @@ const styles = {
     gap: '30px',
     marginBottom: '30px'
   },
-  footerLink: {
+  footerButton: {
     color: 'rgba(255, 255, 255, 0.7)',
+    background: 'none',
+    border: 'none',
     textDecoration: 'none',
     transition: 'color 0.3s ease',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontFamily: 'inherit'
   }
 };
 
@@ -222,36 +226,38 @@ function MainHub({ onNavigate, onLogin }) {
               Diseñamos infraestructuras cloud personalizadas que cumplen con regulaciones financieras y escalan según las necesidades de tu negocio.
             </p>
             <ul style={styles.serviceFeatures}>
-              <li style={styles.featureItem}>✓ Análisis de requerimientos técnicos</li>
-              <li style={styles.featureItem}>✓ Diseño de arquitectura escalable</li>
-              <li style={styles.featureItem}>✓ Cumplimiento normativo fintech</li>
-              <li style={styles.featureItem}>✓ Documentación técnica completa</li>
+              <li style={styles.featureItem}>→ Arquitecturas serverless con Azure Functions</li>
+              <li style={styles.featureItem}>→ Integración con servicios financieros</li>
+              <li style={styles.featureItem}>→ Compliance PCI DSS y regulaciones locales</li>
+              <li style={styles.featureItem}>→ Alta disponibilidad y disaster recovery</li>
             </ul>
           </div>
+
           <div style={styles.serviceCard}>
-            <div style={styles.serviceIcon}>IMPLEMENTATION</div>
-            <h3 style={styles.serviceTitle}>Implementación Azure</h3>
+            <div style={styles.serviceIcon}>DEVELOPMENT & INTEGRATION</div>
+            <h3 style={styles.serviceTitle}>Desarrollo e Integración</h3>
             <p style={styles.serviceText}>
-              Implementamos soluciones completas en Microsoft Azure con las mejores prácticas de seguridad y performance para entornos financieros.
+              Desarrollamos soluciones fintech completas con APIs robustas y interfaces de usuario modernas que se integran perfectamente con tu ecosistema.
             </p>
             <ul style={styles.serviceFeatures}>
-              <li style={styles.featureItem}>✓ Azure Functions y API Management</li>
-              <li style={styles.featureItem}>✓ Cosmos DB y almacenamiento seguro</li>
-              <li style={styles.featureItem}>✓ Azure AD y gestión de identidades</li>
-              <li style={styles.featureItem}>✓ Monitoreo y alertas avanzadas</li>
+              <li style={styles.featureItem}>→ APIs RESTful con Azure API Management</li>
+              <li style={styles.featureItem}>→ Frontend React con autenticación Azure AD</li>
+              <li style={styles.featureItem}>→ Integración con sistemas legacy</li>
+              <li style={styles.featureItem}>→ Microservicios y arquitectura modular</li>
             </ul>
           </div>
+
           <div style={styles.serviceCard}>
-            <div style={styles.serviceIcon}>CONSULTING</div>
-            <h3 style={styles.serviceTitle}>Consultoría Estratégica</h3>
+            <div style={styles.serviceIcon}>SECURITY & COMPLIANCE</div>
+            <h3 style={styles.serviceTitle}>Seguridad y Cumplimiento</h3>
             <p style={styles.serviceText}>
-              Asesoramos en la adopción de tecnologías cloud, optimización de costos y estrategias de migración para empresas fintech.
+              Implementamos marcos de seguridad enterprise-grade que protegen datos financieros sensibles y cumplen con estándares internacionales.
             </p>
             <ul style={styles.serviceFeatures}>
-              <li style={styles.featureItem}>✓ Evaluación de infraestructura actual</li>
-              <li style={styles.featureItem}>✓ Estrategia de migración a cloud</li>
-              <li style={styles.featureItem}>✓ Optimización de costos Azure</li>
-              <li style={styles.featureItem}>✓ Capacitación técnica de equipos</li>
+              <li style={styles.featureItem}>→ Azure Active Directory y gestión de identidades</li>
+              <li style={styles.featureItem}>→ Cifrado end-to-end y Key Vault</li>
+              <li style={styles.featureItem}>→ Monitoreo y auditoría con Application Insights</li>
+              <li style={styles.featureItem}>→ Certificaciones SOC 2 y ISO 27001</li>
             </ul>
           </div>
         </div>
@@ -259,36 +265,44 @@ function MainHub({ onNavigate, onLogin }) {
 
       {/* Value Proposition */}
       <section style={styles.valueProp}>
-        <h2 style={styles.valueTitle}>Por Qué Elegir FINTECH PRO</h2>
+        <h2 style={styles.valueTitle}>¿Por Qué Elegirnos?</h2>
         <div style={styles.valueGrid}>
           <div style={styles.valueItem}>
-            <h3 style={styles.valueNumber}>5+</h3>
-            <h4 style={styles.valueSubtitle}>Años de Experiencia</h4>
-            <p style={styles.valueDesc}>Especializados en arquitecturas cloud para el sector financiero y fintech</p>
+            <div style={styles.valueNumber}>99.9%</div>
+            <h3 style={styles.valueSubtitle}>Uptime Garantizado</h3>
+            <p style={styles.valueDesc}>
+              Infraestructura diseñada para máxima disponibilidad con redundancia geográfica.
+            </p>
           </div>
           <div style={styles.valueItem}>
-            <h3 style={styles.valueNumber}>100%</h3>
-            <h4 style={styles.valueSubtitle}>Azure Certified</h4>
-            <p style={styles.valueDesc}>Equipo certificado en tecnologías Microsoft Azure y mejores prácticas</p>
+            <div style={styles.valueNumber}>100ms</div>
+            <h3 style={styles.valueSubtitle}>Latencia Optimizada</h3>
+            <p style={styles.valueDesc}>
+              Arquitecturas optimizadas para transacciones financieras de alta frecuencia.
+            </p>
           </div>
           <div style={styles.valueItem}>
-            <h3 style={styles.valueNumber}>24/7</h3>
-            <h4 style={styles.valueSubtitle}>Soporte Técnico</h4>
-            <p style={styles.valueDesc}>Monitoreo continuo y soporte especializado para entornos críticos</p>
+            <div style={styles.valueNumber}>24/7</div>
+            <h3 style={styles.valueSubtitle}>Soporte Especializado</h3>
+            <p style={styles.valueDesc}>
+              Equipo dedicado con expertise en fintech y tecnologías Azure.
+            </p>
           </div>
           <div style={styles.valueItem}>
-            <h3 style={styles.valueNumber}>99.9%</h3>
-            <h4 style={styles.valueSubtitle}>Disponibilidad</h4>
-            <p style={styles.valueDesc}>Garantizamos alta disponibilidad con arquitecturas resilientes y redundantes</p>
+            <div style={styles.valueNumber}>ISO 27001</div>
+            <h3 style={styles.valueSubtitle}>Certificaciones</h3>
+            <p style={styles.valueDesc}>
+              Cumplimiento total con estándares internacionales de seguridad.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Call to Action */}
       <section style={styles.ctaSection}>
         <h2 style={styles.valueTitle}>¿Listo para Transformar tu Fintech?</h2>
         <p style={styles.heroText}>
-          Agenda una consultoría gratuita y descubre cómo podemos acelerar tu crecimiento con la infraestructura adecuada.
+          Agenda una consultoría gratuita y descubre cómo podemos acelerar tu crecimiento con la infraestructura cloud adecuada.
         </p>
         <button style={styles.ctaButton} onClick={onLogin}>
           Agendar Consultoría Gratuita
@@ -302,10 +316,10 @@ function MainHub({ onNavigate, onLogin }) {
       <footer style={styles.footer}>
         <div style={styles.footerContent}>
           <div style={styles.footerLinks}>
-            <a style={styles.footerLink}>Proyecto de Tesis UACJ</a>
-            <a style={styles.footerLink}>Documentación Técnica</a>
-            <a style={styles.footerLink} onClick={() => onNavigate('architecture')}>Arquitectura Azure</a>
-            <a style={styles.footerLink}>GitHub Repository</a>
+            <button style={styles.footerButton}>Proyecto de Tesis UACJ</button>
+            <button style={styles.footerButton}>Documentación Técnica</button>
+            <button style={styles.footerButton} onClick={() => onNavigate('architecture')}>Arquitectura Azure</button>
+            <button style={styles.footerButton}>GitHub Repository</button>
           </div>
           <p style={styles.footerText}>© 2025 FINTECH PRO - Proyecto de Tesis. Universidad Autónoma de Ciudad Juárez.</p>
           <p style={styles.footerText}>Diseño e Implementación de una Arquitectura de Servicios en la Nube para Entornos Fintech en Microsoft Azure - José Ángel Guzmán Moreno.</p>

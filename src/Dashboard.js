@@ -286,8 +286,8 @@ function Dashboard() {
 
   // Cargar datos al inicio
   useEffect(() => {
-    loadInitialData();
-  }, [accounts, instance]);
+  loadInitialData();
+  }, [accounts, instance, loadInitialData]);
 
   // Función simple para crear transacción de prueba
   async function createSampleTransaction() {
