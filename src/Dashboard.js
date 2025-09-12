@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
 
@@ -231,8 +231,8 @@ function Dashboard() {
   const [globalTransactions, setGlobalTransactions] = useState(null);
   const [isAdminLoading, setIsAdminLoading] = useState(false);
 
-  // Función simple para obtener transacciones
-  async function fetchTransactions(accessToken) {
+  // fetchTransactions estable para cumplir exhaustive-deps
+  const fetchTransactions = useCallback(async (accessToken) => {
     try {
       const response = await fetch(
         "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
@@ -255,26 +255,22 @@ function Dashboard() {
       console.error("Error al obtener transacciones:", err);
       setError(`Error al cargar transacciones: ${err.message}`);
     }
-  }
+  }, []); // setters de React son estables
 
-  // Función simple para cargar datos iniciales
-  async function loadInitialData() {
+  // Carga inicial estable
+  const loadInitialData = useCallback(async () => {
     if (!accounts || accounts.length === 0) return;
-    
     setLoading(true);
     setError(null);
-    
     try {
       const request = { ...loginRequest, account: accounts[0] };
       const tokenResponse = await instance.acquireTokenSilent(request);
       
-      // Guardar info del usuario
       setUserInfo({
         name: tokenResponse.account.name || tokenResponse.account.username,
         id: tokenResponse.account.localAccountId
       });
 
-      // Cargar transacciones
       await fetchTransactions(tokenResponse.accessToken);
     } catch (err) {
       console.error("Error al cargar datos:", err);
@@ -282,14 +278,14 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [accounts, instance, fetchTransactions]);
 
-  // Cargar datos al inicio
+  // Efecto que depende solo del callback estable
   useEffect(() => {
-  loadInitialData();
-  }, [accounts, instance, loadInitialData]);
+    loadInitialData();
+  }, [loadInitialData]);
 
-  // Función simple para crear transacción de prueba
+  // Crear transacción de prueba
   async function createSampleTransaction() {
     if (!accounts || accounts.length === 0 || !userInfo) {
       setError("No hay información de usuario disponible");
@@ -330,7 +326,7 @@ function Dashboard() {
     }
   }
 
-  // Función simple para obtener transacciones globales
+  // Transacciones globales (admin)
   async function fetchGlobalTransactions() {
     setIsAdminLoading(true);
     setError(null);
@@ -373,7 +369,7 @@ function Dashboard() {
     }
   }
 
-  // Función simple para debug del token
+  // Debug del token
   function debugToken() {
     instance.acquireTokenSilent({...loginRequest, account: accounts[0]})
     .then(tokenResponse => {
@@ -384,7 +380,7 @@ function Dashboard() {
     .catch(console.error);
   }
 
-  // Estados de carga y error
+  // UI
   if (loading) {
     return (
       <div style={styles.loadingState}>
