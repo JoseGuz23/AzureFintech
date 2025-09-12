@@ -4,10 +4,7 @@ import { loginRequest } from "./authConfig";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Activity, DollarSign, TrendingUp, AlertTriangle, Users, Clock, Plus, Eye } from 'lucide-react';
 
-// URL de tu APIM (de tu configuración)
-const API_BASE_URL = "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1";
-
-// Estilos usando tu paleta exacta (mantener todos los existentes)
+// Estilos usando tu paleta exacta (MANTENER EXACTAMENTE IGUAL)
 const styles = {
   container: {
     color: '#FFFFFF',
@@ -309,7 +306,7 @@ const styles = {
   }
 };
 
-// NUEVOS ESTILOS PARA EL MODAL (agregando funcionalidad nueva)
+// NUEVO: Estilos para el modal (únicamente agregando esto)
 const modalStyles = {
   overlay: {
     position: 'fixed',
@@ -413,7 +410,7 @@ const modalStyles = {
   }
 };
 
-// Componentes existentes (mantener todos)
+// Componentes (MANTENER EXACTAMENTE IGUAL)
 const KPICard = ({ icon: Icon, title, value, subtitle, trend, onClick }) => {
   const [hovered, setHovered] = useState(false);
   
@@ -449,7 +446,7 @@ const KPICard = ({ icon: Icon, title, value, subtitle, trend, onClick }) => {
 
 const TransactionItem = ({ transaction, index }) => {
   const [hovered, setHovered] = useState(false);
-  const isPositive = transaction.type === 'credit' || transaction.amount > 0;
+  const isPositive = transaction.amount > 0;
   
   return (
     <div 
@@ -477,7 +474,7 @@ const TransactionItem = ({ transaction, index }) => {
               'Fecha no disponible'
             }
           </div>
-          {/* NUEVO: Mostrar origen/destino */}
+          {/* NUEVO: Mostrar origen/destino si existe */}
           {transaction.fromAccountName && transaction.toAccount && (
             <div style={styles.transactionFrom}>
               De: {transaction.fromAccountName} → A: {transaction.toAccount}
@@ -495,7 +492,7 @@ const TransactionItem = ({ transaction, index }) => {
   );
 };
 
-// NUEVO: Modal de Nueva Transacción
+// NUEVO: Modal de Nueva Transacción (solo agregando esto)
 const NewTransactionModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     amount: '',
@@ -624,7 +621,7 @@ const NewTransactionModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
   );
 };
 
-// Modal mejorado usando tu estilo (mantener existente)
+// Modal mejorado usando tu estilo (MANTENER EXACTAMENTE IGUAL)
 const GlobalTransactionsModal = ({ transactions, onClose }) => (
   <div style={{
     position: 'fixed',
@@ -674,7 +671,7 @@ const GlobalTransactionsModal = ({ transactions, onClose }) => (
   </div>
 );
 
-// Función para procesar datos para gráficos (mantener existente)
+// Función para procesar datos para gráficos (MANTENER EXACTAMENTE IGUAL)
 const processTransactionsForChart = (transactions) => {
   if (!transactions || transactions.length === 0) return [];
 
@@ -696,7 +693,7 @@ const processTransactionsForChart = (transactions) => {
       
       if (hourlyData[hourKey]) {
         hourlyData[hourKey].transactions += 1;
-        hourlyData[hourKey].volume += Math.abs(transaction.amount || 0);
+        hourlyData[hourKey].volume += transaction.amount || 0;
       }
     }
   });
@@ -712,33 +709,24 @@ function Dashboard() {
   const [userInfo, setUserInfo] = useState(null);
   const [globalTransactions, setGlobalTransactions] = useState(null);
   const [isAdminLoading, setIsAdminLoading] = useState(false);
-  
-  // NUEVO: Estados para el modal de nueva transacción
+
+  // NUEVO: Estados para el modal (solo agregando esto)
   const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
 
-  // Función para obtener token
-  const getAccessToken = useCallback(async () => {
-    try {
-      const request = { ...loginRequest, account: accounts[0] };
-      const tokenResponse = await instance.acquireTokenSilent(request);
-      return tokenResponse.accessToken;
-    } catch (error) {
-      console.error("Error obteniendo token:", error);
-      throw error;
-    }
-  }, [instance, accounts]);
-
-  // Tu lógica existente de fetchTransactions (mantener)
+  // Tu lógica existente de fetchTransactions (MANTENER EXACTAMENTE IGUAL)
   const fetchTransactions = useCallback(async (accessToken) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/transactions`, {
-        method: "GET",
-        headers: { 
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+        {
+          method: "GET",
+          headers: { 
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
         }
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -752,7 +740,7 @@ function Dashboard() {
     }
   }, []);
 
-  // Tu lógica existente de loadInitialData (mantener)
+  // Tu lógica existente de loadInitialData (MANTENER EXACTAMENTE IGUAL)
   const loadInitialData = useCallback(async () => {
     if (!accounts || accounts.length === 0) return;
     setLoading(true);
@@ -763,8 +751,7 @@ function Dashboard() {
       
       setUserInfo({
         name: tokenResponse.account.name || tokenResponse.account.username,
-        id: tokenResponse.account.localAccountId,
-        email: tokenResponse.account.username
+        id: tokenResponse.account.localAccountId
       });
 
       await fetchTransactions(tokenResponse.accessToken);
@@ -781,7 +768,7 @@ function Dashboard() {
   }, [loadInitialData]);
 
   // NUEVA: Función para crear transacción con modal
-  const createTransaction = async (transactionData) => {
+  const createTransactionWithForm = async (transactionData) => {
     if (!accounts || accounts.length === 0 || !userInfo) {
       setError("No hay información de usuario disponible");
       return;
@@ -789,30 +776,29 @@ function Dashboard() {
 
     setIsCreatingTransaction(true);
     try {
-      const accessToken = await getAccessToken();
+      const request = { ...loginRequest, account: accounts[0] };
+      const tokenResponse = await instance.acquireTokenSilent(request);
       
       const newTransaction = {
         fromAccountId: userInfo.id,
         fromAccountName: userInfo.name,
-        fromAccountEmail: userInfo.email,
         toAccount: transactionData.recipient,
         amount: transactionData.amount,
         description: transactionData.description,
-        timestamp: new Date().toISOString(),
-        type: 'debit',
-        category: 'transfer',
-        source: 'web_app',
-        status: 'completed'
+        timestamp: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_BASE_URL}/transactions`, {
-        method: "POST",
-        headers: { 
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(newTransaction)
-      });
+      const response = await fetch(
+        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+        {
+          method: "POST",
+          headers: { 
+            "Authorization": `Bearer ${tokenResponse.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newTransaction)
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error al crear transacción: ${response.statusText}`);
@@ -820,7 +806,7 @@ function Dashboard() {
 
       // Cerrar modal y recargar transacciones
       setShowNewTransactionModal(false);
-      await fetchTransactions(accessToken);
+      await fetchTransactions(tokenResponse.accessToken);
       
     } catch (err) {
       console.error("Error al crear transacción:", err);
@@ -830,7 +816,7 @@ function Dashboard() {
     }
   };
 
-  // MODIFICADA: Función existente createSampleTransaction
+  // Todas tus funciones existentes (MANTENER EXACTAMENTE IGUAL)
   const createSampleTransaction = async () => {
     if (!accounts || accounts.length === 0 || !userInfo) {
       setError("No hay información de usuario disponible");
@@ -838,56 +824,56 @@ function Dashboard() {
     }
 
     try {
-      const accessToken = await getAccessToken();
+      const request = { ...loginRequest, account: accounts[0] };
+      const tokenResponse = await instance.acquireTokenSilent(request);
       
       const sampleTransaction = {
-        fromAccountId: userInfo.id,
-        fromAccountName: userInfo.name,
-        fromAccountEmail: userInfo.email,
-        toAccount: "Usuario de Prueba",
+        accountId: userInfo.id,
         amount: Math.floor(Math.random() * 1000) + 10,
-        description: "Transacción de prueba generada automáticamente",
-        timestamp: new Date().toISOString(),
-        type: 'debit',
-        category: 'test',
-        source: 'web_app'
+        timestamp: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_BASE_URL}/transactions`, {
-        method: "POST",
-        headers: { 
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(sampleTransaction)
-      });
+      const response = await fetch(
+        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+        {
+          method: "POST",
+          headers: { 
+            "Authorization": `Bearer ${tokenResponse.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(sampleTransaction)
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error al crear transacción: ${response.statusText}`);
       }
 
-      await fetchTransactions(accessToken);
+      await fetchTransactions(tokenResponse.accessToken);
     } catch (err) {
       console.error("Error al crear transacción:", err);
       setError(`Error al crear transacción: ${err.message}`);
     }
   };
 
-  // Mantener todas tus funciones existentes
   const fetchGlobalTransactions = async () => {
     setIsAdminLoading(true);
     setError(null);
 
     try {
-      const accessToken = await getAccessToken();
+      const request = { ...loginRequest, account: accounts[0] };
+      const tokenResponse = await instance.acquireTokenSilent(request);
       
-      const response = await fetch(`${API_BASE_URL}/GetGlobalTransactions`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/GetGlobalTransactions",
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${tokenResponse.accessToken}`,
+            "Content-Type": "application/json"
+          }
         }
-      });
+      );
 
       if (response.status === 401) {
         throw new Error("Token rechazado. Verifica la configuración.");
@@ -922,8 +908,8 @@ function Dashboard() {
       .catch(console.error);
   };
 
-  // Cálculos para KPIs (mantener existentes)
-  const totalVolume = transactions.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+  // Cálculos para KPIs (MANTENER EXACTAMENTE IGUAL)
+  const totalVolume = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
   const avgTransaction = transactions.length > 0 ? totalVolume / transactions.length : 0;
   const recentTransactions = transactions.filter(t => {
     if (!t.timestamp) return false;
@@ -932,10 +918,10 @@ function Dashboard() {
     return transactionDate > oneDayAgo;
   }).length;
 
-  // Datos para gráficos (mantener existentes)
+  // Datos para gráficos (MANTENER EXACTAMENTE IGUAL)
   const chartData = processTransactionsForChart(transactions);
 
-  // Estados de carga y error (mantener existentes)
+  // Estados de carga y error (MANTENER EXACTAMENTE IGUAL)
   if (loading) {
     return (
       <div style={styles.loadingState}>
@@ -968,7 +954,7 @@ function Dashboard() {
 
   return (
     <div style={styles.container}>
-      {/* Header (mantener) */}
+      {/* Header (MANTENER EXACTAMENTE IGUAL) */}
       <div style={styles.header}>
         <h1 style={styles.title}>Dashboard Financiero</h1>
         <p style={styles.subtitle}>
@@ -976,7 +962,7 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* KPI Cards (mantener) */}
+      {/* KPI Cards (MANTENER EXACTAMENTE IGUAL) */}
       <div style={styles.kpiGrid}>
         <KPICard
           icon={DollarSign}
@@ -1006,7 +992,7 @@ function Dashboard() {
         />
       </div>
 
-      {/* Charts Section (mantener todas las gráficas) */}
+      {/* Charts Section (MANTENER EXACTAMENTE IGUAL) */}
       {chartData.length > 0 && (
         <div style={styles.chartsSection}>
           <div style={styles.chartsGrid}>
@@ -1074,7 +1060,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Sección de transacciones (MODIFICADA para incluir nuevo botón) */}
+      {/* Sección de transacciones (SOLO MODIFICANDO EL BOTÓN) */}
       <section style={styles.transactionsSection}>
         <div style={styles.sectionHeader}>
           <h3 style={styles.sectionTitle}>
@@ -1094,7 +1080,7 @@ function Dashboard() {
               <Users size={16} />
               {isAdminLoading ? "Cargando..." : "Ver Todas (Admin)"}
             </button>
-            {/* NUEVO: Botón de Nueva Transacción con Modal */}
+            {/* MODIFICADO: Cambiar el comportamiento del botón "Nueva Transacción" */}
             <button 
               onClick={() => setShowNewTransactionModal(true)} 
               style={styles.button}
@@ -1103,14 +1089,10 @@ function Dashboard() {
               <Plus size={16} />
               Nueva Transacción
             </button>
-            <button onClick={createSampleTransaction} style={{...styles.button, ...styles.buttonSecondary}}>
-              <Activity size={16} />
-              Transacción Prueba
-            </button>
           </div>
         </div>
 
-        {/* Lista de transacciones (mantener) */}
+        {/* Lista de transacciones (MANTENER EXACTAMENTE IGUAL) */}
         {transactions.length === 0 ? (
           <div style={styles.emptyState}>
             <DollarSign size={48} color="rgba(169, 139, 81, 0.5)" style={{ marginBottom: '16px' }} />
@@ -1126,15 +1108,15 @@ function Dashboard() {
         )}
       </section>
 
-      {/* NUEVO: Modal para nueva transacción */}
+      {/* NUEVO: Modal para nueva transacción (solo agregando esto) */}
       <NewTransactionModal
         isOpen={showNewTransactionModal}
         onClose={() => setShowNewTransactionModal(false)}
-        onSubmit={createTransaction}
+        onSubmit={createTransactionWithForm}
         isLoading={isCreatingTransaction}
       />
 
-      {/* Modal para transacciones globales (mantener) */}
+      {/* Modal para transacciones globales (MANTENER EXACTAMENTE IGUAL) */}
       {globalTransactions && (
         <GlobalTransactionsModal
           transactions={globalTransactions}
