@@ -4,12 +4,12 @@ export const loginRequest = {
     prompt: "select_account"
 };
 
-// Configuración para producción
+// Configuración que funciona en local Y producción
 export const msalConfig = {
     auth: {
         clientId: "b32c0847-391c-4036-8cf2-c86b11aad8e8",
         authority: "https://login.microsoftonline.com/e1ba6395-7a64-4b92-aaf3-a7c020c3d18f",
-        redirectUri: "https://black-ground-0fb7f661e.2.azurestaticapps.net" // CAMBIAR ESTA LÍNEA
+        redirectUri: window.location.origin // ← CAMBIO AQUÍ: detecta automáticamente
     },
     cache: {
         cacheLocation: "sessionStorage",
