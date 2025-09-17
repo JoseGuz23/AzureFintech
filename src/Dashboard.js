@@ -1,806 +1,52 @@
+// src/Dashboard.js - Versión Final Limpia y Optimizada
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Activity, DollarSign, TrendingUp, AlertTriangle, Users, Clock, Plus, Eye } from 'lucide-react';
 
-// Estilos usando tu paleta exacta (MANTENER EXACTAMENTE IGUAL)
-const styles = {
-  container: {
-    color: '#FFFFFF',
-    fontFamily: "'Inter', 'Arial', sans-serif"
-  },
-  header: {
-    marginBottom: '32px',
-    textAlign: 'center'
-  },
-  title: {
-    fontSize: '2.5rem',
-    fontWeight: 700,
-    marginBottom: '8px',
-    background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-    lineHeight: 1.2
-  },
-  subtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: '1.1rem',
-    margin: 0
-  },
-  
-  // KPI Cards usando tu estilo
-  kpiGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
-    marginBottom: '40px'
-  },
-  kpiCard: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    padding: '30px',
-    borderRadius: '16px',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-    position: 'relative'
-  },
-  kpiCardHover: {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 25px rgba(169, 139, 81, 0.15)'
-  },
-  kpiHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '16px'
-  },
-  kpiIcon: {
-    padding: '12px',
-    background: 'rgba(169, 139, 81, 0.1)',
-    borderRadius: '12px',
-    border: '1px solid rgba(169, 139, 81, 0.2)'
-  },
-  kpiTrend: {
-    fontSize: '14px',
-    fontWeight: '600',
-    padding: '4px 8px',
-    borderRadius: '6px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px'
-  },
-  kpiTrendPositive: {
-    color: '#A98B51',
-    background: 'rgba(169, 139, 81, 0.1)'
-  },
-  kpiTrendNegative: {
-    color: '#DC3545',
-    background: 'rgba(220, 53, 69, 0.1)'
-  },
-  kpiValue: {
-    fontSize: '2.5rem',
-    fontWeight: 700,
-    color: '#A98B51',
-    marginBottom: '8px',
-    lineHeight: 1
-  },
-  kpiLabel: {
-    color: '#FFFFFF',
-    fontSize: '1.1rem',
-    fontWeight: '600',
-    marginBottom: '4px'
-  },
-  kpiSubLabel: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: '0.9rem'
-  },
+// Importaciones centralizadas
+import { 
+  API_CONFIG, 
+  APP_CONFIG, 
+  HTTP_HEADERS, 
+  ERROR_MESSAGES, 
+  ENVIRONMENT, 
+  HELPERS,
+  CHART_CONFIG 
+} from './config';
 
-  // Sección de gráficos
-  chartsSection: {
-    marginBottom: '40px'
-  },
-  chartsGrid: {
-    display: 'grid',
-    gridTemplateColumns: '2fr 1fr',
-    gap: '24px',
-    marginBottom: '32px'
-  },
-  chartCard: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    padding: '30px',
-    borderRadius: '16px',
-    border: '1px solid rgba(169, 139, 81, 0.2)'
-  },
-  chartTitle: {
-    color: '#FFFFFF',
-    fontSize: '1.3rem',
-    fontWeight: '600',
-    marginBottom: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
-  },
+import { 
+  dashboardStyles, 
+  kpiStyles, 
+  chartStyles, 
+  transactionStyles, 
+  buttonStyles, 
+  stateStyles,
+  colors 
+} from './styles/theme';
 
-  // Sección de transacciones (mejorada)
-  transactionsSection: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    padding: '30px',
-    borderRadius: '16px',
-    border: '1px solid rgba(169, 139, 81, 0.2)'
-  },
-  sectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-    gap: '16px'
-  },
-  sectionTitle: {
-    color: '#FFFFFF',
-    fontSize: '1.3rem',
-    fontWeight: '600',
-    margin: 0,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
-  },
-  badge: {
-    background: '#A98B51',
-    color: '#0C1010',
-    padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    marginLeft: '8px'
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap'
-  },
-  button: {
-    padding: '12px 24px',
-    background: 'linear-gradient(45deg, #A98B51, #C5A572)',
-    color: '#0C1010',
-    border: 'none',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    boxShadow: '0 4px 12px rgba(169, 139, 81, 0.25)'
-  },
-  buttonSecondary: {
-    background: 'linear-gradient(45deg, #162C2C, #263B35)',
-    color: '#FFFFFF',
-    border: '1px solid rgba(169, 139, 81, 0.3)',
-    boxShadow: 'none'
-  },
-  buttonInfo: {
-    background: 'linear-gradient(45deg, #17a2b8, #20c997)',
-    color: '#FFFFFF',
-    boxShadow: '0 4px 12px rgba(23, 162, 184, 0.25)'
-  },
+// Importar todos los componentes de una vez
+import { 
+  KPICard, 
+  TransactionItem, 
+  UACJTransactionModal, 
+  GlobalTransactionsModal 
+} from './components';
 
-  // Lista de transacciones mejorada
-  transactionsList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px'
-  },
-  transactionItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '20px',
-    background: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: '12px',
-    border: '1px solid rgba(169, 139, 81, 0.1)',
-    transition: 'all 0.3s ease'
-  },
-  transactionItemHover: {
-    background: 'rgba(255, 255, 255, 0.05)',
-    borderColor: 'rgba(169, 139, 81, 0.2)',
-    transform: 'translateX(4px)'
-  },
-  transactionInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px'
-  },
-  transactionIcon: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '18px'
-  },
-  transactionIconPositive: {
-    background: 'rgba(169, 139, 81, 0.1)',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    color: '#A98B51'
-  },
-  transactionIconNegative: {
-    background: 'rgba(220, 53, 69, 0.1)',
-    border: '1px solid rgba(220, 53, 69, 0.2)',
-    color: '#DC3545'
-  },
-  transactionDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
-  },
-  transactionDescription: {
-    color: '#FFFFFF',
-    fontSize: '1rem',
-    fontWeight: '600'
-  },
-  transactionDate: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: '0.85rem'
-  },
-  transactionFrom: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: '0.8rem',
-    fontStyle: 'italic'
-  },
-  transactionAmount: {
-    fontSize: '1.2rem',
-    fontWeight: '700',
-    fontFamily: 'monospace'
-  },
-  transactionAmountPositive: {
-    color: '#A98B51'
-  },
-  transactionAmountNegative: {
-    color: '#DC3545'
-  },
-
-  // Estados
-  loadingState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    borderRadius: '16px',
-    border: '1px solid rgba(169, 139, 81, 0.2)'
-  },
-  loadingIcon: {
-    color: '#A98B51',
-    marginBottom: '16px',
-    animation: 'pulse 2s infinite'
-  },
-  errorState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    background: 'rgba(220, 53, 69, 0.05)',
-    borderRadius: '16px',
-    border: '1px solid rgba(220, 53, 69, 0.2)',
-    color: '#DC3545'
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    background: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: '12px',
-    border: '2px dashed rgba(169, 139, 81, 0.2)'
-  },
-  emptyText: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: '1rem',
-    marginBottom: '8px'
-  },
-  emptySubtext: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: '0.9rem'
-  }
-};
-
-// NUEVO: Estilos para el modal UACJ
-const modalStyles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    backdropFilter: 'blur(5px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  },
-  content: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    padding: '30px',
-    borderRadius: '16px',
-    width: '90%',
-    maxWidth: '500px',
-    maxHeight: '80vh',
-    overflowY: 'auto',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '2px solid #A98B51',
-    paddingBottom: '15px',
-    marginBottom: '25px'
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: '1.5rem',
-    fontWeight: '600',
-    margin: 0
-  },
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '1.8rem',
-    cursor: 'pointer',
-    color: '#A98B51',
-    transition: 'color 0.3s ease'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  },
-  label: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: '0.95rem',
-    fontWeight: '500'
-  },
-  input: {
-    padding: '12px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    border: '1px solid rgba(169, 139, 81, 0.3)',
-    borderRadius: '6px',
-    color: '#FFFFFF',
-    fontSize: '1rem',
-    transition: 'border-color 0.3s ease'
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '12px',
-    marginTop: '10px'
-  },
-  submitButton: {
-    flex: 1,
-    padding: '12px',
-    background: 'linear-gradient(45deg, #A98B51, #C5A572)',
-    color: '#0C1010',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    fontWeight: '600',
-    transition: 'all 0.3s ease'
-  },
-  cancelButton: {
-    flex: 1,
-    padding: '12px',
-    background: 'transparent',
-    color: 'rgba(255, 255, 255, 0.8)',
-    border: '1px solid rgba(169, 139, 81, 0.3)',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    transition: 'all 0.3s ease'
-  },
-  errorText: {
-    color: '#DC3545',
-    fontSize: '0.9rem',
-    marginTop: '5px'
-  },
-  successText: {
-    color: '#28A745',
-    fontSize: '0.9rem',
-    marginTop: '5px'
-  },
-  helperText: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: '0.85rem',
-    marginTop: '4px'
-  },
-  exampleEmails: {
-    background: 'rgba(169, 139, 81, 0.1)',
-    padding: '12px',
-    borderRadius: '6px',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    marginTop: '10px'
-  },
-  exampleTitle: {
-    color: '#A98B51',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    marginBottom: '8px'
-  },
-  exampleItem: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: '0.85rem',
-    margin: '4px 0'
-  }
-};
-
-// Componentes (MANTENER EXACTAMENTE IGUAL)
-const KPICard = ({ icon: Icon, title, value, subtitle, trend, onClick }) => {
-  const [hovered, setHovered] = useState(false);
-  
-  return (
-    <div 
-      style={{
-        ...styles.kpiCard,
-        ...(hovered ? styles.kpiCardHover : {})
-      }}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div style={styles.kpiHeader}>
-        <div style={styles.kpiIcon}>
-          <Icon size={24} color="#A98B51" />
-        </div>
-        {trend && (
-          <div style={{
-            ...styles.kpiTrend,
-            ...(trend > 0 ? styles.kpiTrendPositive : styles.kpiTrendNegative)
-          }}>
-            {trend > 0 ? '+' : ''}{trend}%
-          </div>
-        )}
-      </div>
-      <div style={styles.kpiValue}>{value}</div>
-      <div style={styles.kpiLabel}>{title}</div>
-      {subtitle && <div style={styles.kpiSubLabel}>{subtitle}</div>}
-    </div>
-  );
-};
-
-const TransactionItem = ({ transaction, index }) => {
-  const [hovered, setHovered] = useState(false);
-  const isPositive = transaction.amount > 0;
-  
-  return (
-    <div 
-      style={{
-        ...styles.transactionItem,
-        ...(hovered ? styles.transactionItemHover : {})
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div style={styles.transactionInfo}>
-        <div style={{
-          ...styles.transactionIcon,
-          ...(isPositive ? styles.transactionIconPositive : styles.transactionIconNegative)
-        }}>
-          {isPositive ? '+' : '-'}
-        </div>
-        <div style={styles.transactionDetails}>
-          <div style={styles.transactionDescription}>
-            {transaction.description || `Transacción #${index + 1}`}
-          </div>
-          <div style={styles.transactionDate}>
-            {transaction.timestamp ? 
-              new Date(transaction.timestamp).toLocaleString() : 
-              'Fecha no disponible'
-            }
-          </div>
-          {/* Mostrar origen/destino si existe */}
-          {transaction.fromAccountName && transaction.toAccount && (
-            <div style={styles.transactionFrom}>
-              De: {transaction.fromAccountName} → A: {transaction.toAccount}
-            </div>
-          )}
-        </div>
-      </div>
-      <div style={{
-        ...styles.transactionAmount,
-        ...(isPositive ? styles.transactionAmountPositive : styles.transactionAmountNegative)
-      }}>
-        {isPositive ? '+' : ''}${Math.abs(transaction.amount || 0).toLocaleString()}
-      </div>
-    </div>
-  );
-};
-
-// NUEVO: Modal de Nueva Transacción UACJ (reemplazando el anterior)
-const UACJTransactionModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
-  const [formData, setFormData] = useState({
-    recipientEmail: '',
-    amount: '',
-    description: ''
-  });
-  const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({ recipientEmail: '', amount: '', description: '' });
-      setErrors({});
-    }
-  }, [isOpen]);
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const uacjDomains = ['@uacj.mx', '@alumnos.uacj.mx', '@uacj.edu.mx'];
-    
-    if (!emailRegex.test(email)) {
-      return 'Formato de email inválido';
-    }
-    
-    const hasValidDomain = uacjDomains.some(domain => email.toLowerCase().endsWith(domain));
-    if (!hasValidDomain) {
-      return 'Solo se permiten emails de UACJ (@uacj.mx, @alumnos.uacj.mx)';
-    }
-    
-    return null;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Limpiar error del campo cuando el usuario empiece a escribir
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-
-    // Validación en tiempo real para email
-    if (name === 'recipientEmail' && value) {
-      const emailError = validateEmail(value);
-      if (emailError) {
-        setErrors(prev => ({ ...prev, recipientEmail: emailError }));
-      }
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Validar email
-    if (!formData.recipientEmail) {
-      newErrors.recipientEmail = 'Debe ingresar el email del destinatario';
-    } else {
-      const emailError = validateEmail(formData.recipientEmail);
-      if (emailError) {
-        newErrors.recipientEmail = emailError;
-      }
-    }
-    
-    // Validar monto
-    if (!formData.amount || isNaN(formData.amount) || parseFloat(formData.amount) <= 0) {
-      newErrors.amount = 'Debe ingresar un monto válido mayor a 0';
-    } else if (parseFloat(formData.amount) > 10000) {
-      newErrors.amount = 'El monto no puede ser mayor a $10,000';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      onSubmit({
-        recipient: formData.recipientEmail,
-        amount: parseFloat(formData.amount),
-        description: formData.description || `Transferencia a ${formData.recipientEmail}`
-      });
-    }
-  };
-
-  const handleClose = () => {
-    setFormData({ recipientEmail: '', amount: '', description: '' });
-    setErrors({});
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div style={modalStyles.overlay} onClick={handleClose}>
-      <div style={modalStyles.content} onClick={e => e.stopPropagation()}>
-        <div style={modalStyles.header}>
-          <h3 style={modalStyles.title}>Nueva Transferencia UACJ</h3>
-          <button 
-            onClick={handleClose} 
-            style={modalStyles.closeButton}
-            onMouseOver={e => e.target.style.color = '#FFFFFF'}
-            onMouseOut={e => e.target.style.color = '#A98B51'}
-          >
-            ×
-          </button>
-        </div>
-
-        <form style={modalStyles.form} onSubmit={handleSubmit}>
-          {/* Email del destinatario */}
-          <div style={modalStyles.formGroup}>
-            <label style={modalStyles.label}>Email del destinatario:</label>
-            <input
-              type="email"
-              name="recipientEmail"
-              value={formData.recipientEmail}
-              onChange={handleInputChange}
-              placeholder="usuario@uacj.mx"
-              style={{
-                ...modalStyles.input,
-                borderColor: errors.recipientEmail ? '#DC3545' : 
-                           formData.recipientEmail && !errors.recipientEmail ? '#28A745' : 
-                           'rgba(169, 139, 81, 0.3)'
-              }}
-              required
-            />
-            {errors.recipientEmail && (
-              <div style={modalStyles.errorText}>{errors.recipientEmail}</div>
-            )}
-            {formData.recipientEmail && !errors.recipientEmail && validateEmail(formData.recipientEmail) === null && (
-              <div style={modalStyles.successText}>✓ Email válido de UACJ</div>
-            )}
-            <div style={modalStyles.helperText}>
-              Solo se permiten emails de UACJ
-            </div>
-          </div>
-
-          {/* Ejemplos de emails válidos */}
-          <div style={modalStyles.exampleEmails}>
-            <div style={modalStyles.exampleTitle}>Ejemplos de emails válidos:</div>
-            <div style={modalStyles.exampleItem}>• profesor@uacj.mx</div>
-            <div style={modalStyles.exampleItem}>• estudiante@alumnos.uacj.mx</div>
-            <div style={modalStyles.exampleItem}>• admin@uacj.edu.mx</div>
-          </div>
-
-          {/* Monto */}
-          <div style={modalStyles.formGroup}>
-            <label style={modalStyles.label}>Monto:</label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleInputChange}
-              placeholder="0.00"
-              min="0.01"
-              max="10000"
-              step="0.01"
-              style={{
-                ...modalStyles.input,
-                borderColor: errors.amount ? '#DC3545' : 'rgba(169, 139, 81, 0.3)'
-              }}
-              required
-            />
-            {errors.amount && <div style={modalStyles.errorText}>{errors.amount}</div>}
-            <div style={modalStyles.helperText}>
-              Monto máximo: $10,000.00
-            </div>
-          </div>
-
-          {/* Descripción */}
-          <div style={modalStyles.formGroup}>
-            <label style={modalStyles.label}>Descripción (opcional):</label>
-            <input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Concepto de la transferencia..."
-              maxLength="100"
-              style={modalStyles.input}
-            />
-            <div style={modalStyles.helperText}>
-              {formData.description.length}/100 caracteres
-            </div>
-          </div>
-
-          {/* Error general */}
-          {errors.general && (
-            <div style={modalStyles.errorText}>{errors.general}</div>
-          )}
-
-          {/* Botones */}
-          <div style={modalStyles.buttonGroup}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={modalStyles.cancelButton}
-              disabled={isLoading}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              style={{
-                ...modalStyles.submitButton,
-                opacity: isLoading ? 0.7 : 1,
-                cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Procesando...' : 'Enviar Transferencia'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// Modal mejorado usando tu estilo (MANTENER EXACTAMENTE IGUAL)
-const GlobalTransactionsModal = ({ transactions, onClose }) => (
-  <div style={{
-    position: 'fixed',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  }}>
-    <div style={{
-      background: 'linear-gradient(135deg, #263B35, #162C2C)',
-      padding: '30px',
-      borderRadius: '16px',
-      width: '90%',
-      maxWidth: '800px',
-      maxHeight: '80vh',
-      overflowY: 'auto',
-      border: '1px solid rgba(169, 139, 81, 0.2)'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '2px solid #A98B51',
-        paddingBottom: '15px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.3rem', fontWeight: '600' }}>
-          Transacciones Globales (Admin)
-          <span style={styles.badge}>{transactions.length}</span>
-        </h3>
-        <button onClick={onClose} style={{
-          background: 'none',
-          border: 'none',
-          fontSize: '1.5rem',
-          cursor: 'pointer',
-          color: '#A98B51'
-        }}>×</button>
-      </div>
-      <div style={styles.transactionsList}>
-        {transactions.map((transaction, index) => (
-          <TransactionItem key={transaction.id || index} transaction={transaction} index={index} />
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-// Función para procesar datos para gráficos (MANTENER EXACTAMENTE IGUAL)
+/**
+ * Procesa las transacciones para mostrar en gráficos
+ * @param {Array} transactions - Array de transacciones
+ * @returns {Array} Datos formateados para gráficos
+ */
 const processTransactionsForChart = (transactions) => {
   if (!transactions || transactions.length === 0) return [];
 
   const hourlyData = {};
   const now = new Date();
   
-  // Inicializar últimas 12 horas
-  for (let i = 11; i >= 0; i--) {
+  // Crear estructura de datos para las últimas horas
+  for (let i = APP_CONFIG.CHART_HOURS_RANGE - 1; i >= 0; i--) {
     const hour = new Date(now.getTime() - (i * 60 * 60 * 1000));
     const hourKey = hour.getHours().toString().padStart(2, '0') + ':00';
     hourlyData[hourKey] = { time: hourKey, transactions: 0, volume: 0 };
@@ -814,7 +60,7 @@ const processTransactionsForChart = (transactions) => {
       
       if (hourlyData[hourKey]) {
         hourlyData[hourKey].transactions += 1;
-        hourlyData[hourKey].volume += transaction.amount || 0;
+        hourlyData[hourKey].volume += Math.abs(transaction.amount) || 0;
       }
     }
   });
@@ -822,92 +68,113 @@ const processTransactionsForChart = (transactions) => {
   return Object.values(hourlyData);
 };
 
+/**
+ * Componente principal del Dashboard
+ */
 function Dashboard() {
+  // Estados principales
   const { instance, accounts } = useMsal();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  
+  // Estados para modales
   const [globalTransactions, setGlobalTransactions] = useState(null);
-  const [isAdminLoading, setIsAdminLoading] = useState(false);
-
-  // NUEVO: Estados para el modal UACJ (reemplazando el anterior)
   const [showUACJTransactionModal, setShowUACJTransactionModal] = useState(false);
+  
+  // Estados para operaciones en progreso
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
 
-  // Tu lógica existente de fetchTransactions (MANTENER EXACTAMENTE IGUAL)
+  /**
+   * Obtiene las transacciones del usuario desde la API
+   */
   const fetchTransactions = useCallback(async (accessToken) => {
     try {
+      HELPERS.debugLog('Fetching user transactions...');
+      
       const response = await fetch(
-        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+        API_CONFIG.getURL(API_CONFIG.ENDPOINTS.TRANSACTIONS),
         {
           method: "GET",
-          headers: { 
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-          }
+          headers: HTTP_HEADERS.withAuth(accessToken)
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        throw new Error(`${ERROR_MESSAGES.NETWORK.SERVER_ERROR} (${response.status})`);
       }
       
       const data = await response.json();
-      setTransactions(data.transactions || []);
+      const userTransactions = data.transactions || [];
+      setTransactions(userTransactions);
+      
+      HELPERS.debugLog('User transactions loaded', userTransactions.length);
     } catch (err) {
       console.error("Error al obtener transacciones:", err);
-      setError(`Error al cargar transacciones: ${err.message}`);
+      setError(`${ERROR_MESSAGES.TRANSACTION.LOAD_FAILED}: ${err.message}`);
     }
   }, []);
 
-  // Tu lógica existente de loadInitialData (MANTENER EXACTAMENTE IGUAL)
+  /**
+   * Carga inicial de datos del usuario
+   */
   const loadInitialData = useCallback(async () => {
     if (!accounts || accounts.length === 0) return;
+    
     setLoading(true);
     setError(null);
+    
     try {
       const request = { ...loginRequest, account: accounts[0] };
       const tokenResponse = await instance.acquireTokenSilent(request);
       
+      // Extraer información del usuario del token
       setUserInfo({
         name: tokenResponse.account.name || tokenResponse.account.username,
-        id: tokenResponse.account.localAccountId
+        id: tokenResponse.account.localAccountId,
+        email: tokenResponse.account.username
       });
 
+      // Cargar transacciones del usuario
       await fetchTransactions(tokenResponse.accessToken);
+      
     } catch (err) {
-      console.error("Error al cargar datos:", err);
-      setError("Error al cargar los datos iniciales.");
+      console.error("Error al cargar datos iniciales:", err);
+      setError(ERROR_MESSAGES.NETWORK.CONNECTION_FAILED);
     } finally {
       setLoading(false);
     }
   }, [accounts, instance, fetchTransactions]);
 
+  // Efecto para carga inicial
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
 
-  // NUEVA: Función para crear transacción UACJ (reemplazando la anterior)
+  /**
+   * Crea una nueva transacción UACJ
+   */
   const createUACJTransaction = async (transactionData) => {
     if (!accounts || accounts.length === 0 || !userInfo) {
-      setError("No hay información de usuario disponible");
+      setError(ERROR_MESSAGES.AUTH.NOT_AUTHENTICATED);
       return;
     }
 
     setIsCreatingTransaction(true);
+    
     try {
       const request = { ...loginRequest, account: accounts[0] };
       const tokenResponse = await instance.acquireTokenSilent(request);
       
+      HELPERS.debugLog('Creating new UACJ transaction', transactionData);
+      
       const response = await fetch(
-        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+        API_CONFIG.getURL(API_CONFIG.ENDPOINTS.TRANSACTIONS),
         {
           method: "POST",
-          headers: { 
-            "Authorization": `Bearer ${tokenResponse.accessToken}`,
-            "Content-Type": "application/json"
-          },
+          headers: HTTP_HEADERS.withAuth(tokenResponse.accessToken),
           body: JSON.stringify({
             recipient: transactionData.recipient,
             amount: transactionData.amount,
@@ -918,61 +185,27 @@ function Dashboard() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error al crear transacción: ${response.status} ${errorText}`);
+        throw new Error(`${ERROR_MESSAGES.TRANSACTION.CREATE_FAILED}: ${response.status} ${errorText}`);
       }
 
-      // Cerrar modal y recargar transacciones
+      const result = await response.json();
+      HELPERS.debugLog('Transaction created successfully', result);
+
+      // Cerrar modal y recargar datos
       setShowUACJTransactionModal(false);
       await fetchTransactions(tokenResponse.accessToken);
       
     } catch (err) {
       console.error("Error al crear transacción:", err);
-      setError(`Error al crear transacción: ${err.message}`);
+      setError(err.message);
     } finally {
       setIsCreatingTransaction(false);
     }
   };
 
-  // Todas tus funciones existentes (MANTENER EXACTAMENTE IGUAL)
-  const createSampleTransaction = async () => {
-    if (!accounts || accounts.length === 0 || !userInfo) {
-      setError("No hay información de usuario disponible");
-      return;
-    }
-
-    try {
-      const request = { ...loginRequest, account: accounts[0] };
-      const tokenResponse = await instance.acquireTokenSilent(request);
-      
-      const sampleTransaction = {
-        accountId: userInfo.id,
-        amount: Math.floor(Math.random() * 1000) + 10,
-        timestamp: new Date().toISOString()
-      };
-
-      const response = await fetch(
-        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
-        {
-          method: "POST",
-          headers: { 
-            "Authorization": `Bearer ${tokenResponse.accessToken}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(sampleTransaction)
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error al crear transacción: ${response.statusText}`);
-      }
-
-      await fetchTransactions(tokenResponse.accessToken);
-    } catch (err) {
-      console.error("Error al crear transacción:", err);
-      setError(`Error al crear transacción: ${err.message}`);
-    }
-  };
-
+  /**
+   * Obtiene todas las transacciones del sistema (solo admin)
+   */
   const fetchGlobalTransactions = async () => {
     setIsAdminLoading(true);
     setError(null);
@@ -982,70 +215,86 @@ function Dashboard() {
       const tokenResponse = await instance.acquireTokenSilent(request);
       
       const response = await fetch(
-        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/GetGlobalTransactions",
+        API_CONFIG.getURL(API_CONFIG.ENDPOINTS.GLOBAL_TRANSACTIONS),
         {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${tokenResponse.accessToken}`,
-            "Content-Type": "application/json"
-          }
+          headers: HTTP_HEADERS.withAuth(tokenResponse.accessToken)
         }
       );
 
       if (response.status === 401) {
-        throw new Error("Token rechazado. Verifica la configuración.");
+        throw new Error(ERROR_MESSAGES.AUTH.TOKEN_EXPIRED);
       }
       
       if (response.status === 403) {
-        throw new Error("Acceso denegado. Se requiere rol de administrador.");
+        throw new Error(ERROR_MESSAGES.AUTH.INSUFFICIENT_PERMISSIONS);
       }
       
       if (!response.ok) {
-        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        throw new Error(`${ERROR_MESSAGES.NETWORK.SERVER_ERROR}: ${response.status}`);
       }
 
       const data = await response.json();
       setGlobalTransactions(data.transactions || []);
-
+      
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error al obtener transacciones globales:', err);
       setError(err.message);
     } finally {
       setIsAdminLoading(false);
     }
   };
 
+  /**
+   * Función de debug para mostrar información del token (solo desarrollo)
+   */
   const debugToken = () => {
+    if (!ENVIRONMENT.DEBUG.ENABLE_DEBUG_BUTTONS) return;
+    
     instance.acquireTokenSilent({...loginRequest, account: accounts[0]})
       .then(tokenResponse => {
         const payload = JSON.parse(atob(tokenResponse.accessToken.split('.')[1]));
-        console.log('Token payload:', payload);
-        alert(`Usuario: ${payload.name}\nRoles: ${JSON.stringify(payload.roles || 'Sin roles')}`);
+        HELPERS.debugLog('Token payload', payload);
+        
+        const debugInfo = `
+Usuario: ${payload.name || 'N/A'}
+Email: ${payload.email || payload.preferred_username || 'N/A'}
+ID: ${payload.oid || payload.sub || 'N/A'}
+Roles: ${JSON.stringify(payload.roles || [])}
+Tenant: ${payload.tid || 'N/A'}
+        `.trim();
+        
+        alert(debugInfo);
       })
       .catch(console.error);
   };
 
-  // Cálculos para KPIs (MANTENER EXACTAMENTE IGUAL)
-  const totalVolume = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
-  const avgTransaction = transactions.length > 0 ? totalVolume / transactions.length : 0;
-  const recentTransactions = transactions.filter(t => {
-    if (!t.timestamp) return false;
-    const transactionDate = new Date(t.timestamp);
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    return transactionDate > oneDayAgo;
-  }).length;
+  // Cálculos de métricas (KPIs)
+  const metrics = {
+    totalVolume: transactions.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0),
+    totalCount: transactions.length,
+    avgTransaction: transactions.length > 0 ? 
+      transactions.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0) / transactions.length : 0,
+    recentCount: transactions.filter(t => {
+      if (!t.timestamp) return false;
+      const transactionDate = new Date(t.timestamp);
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      return transactionDate > oneDayAgo;
+    }).length
+  };
 
-  // Datos para gráficos (MANTENER EXACTAMENTE IGUAL)
   const chartData = processTransactionsForChart(transactions);
 
-  // Estados de carga y error (MANTENER EXACTAMENTE IGUAL)
+  // Renderizado condicional para estados de carga y error
   if (loading) {
     return (
-      <div style={styles.loadingState}>
-        <div style={styles.loadingIcon}>
+      <div style={stateStyles.loading}>
+        <div style={stateStyles.loadingIcon}>
           <Activity size={48} />
         </div>
-        <h3 style={{ color: '#FFFFFF', margin: '16px 0 8px 0' }}>Cargando Dashboard</h3>
+        <h3 style={{ color: colors.white, margin: '16px 0 8px 0' }}>
+          Cargando Dashboard
+        </h3>
         <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0 }}>
           Conectando con Azure Functions...
         </p>
@@ -1055,157 +304,201 @@ function Dashboard() {
 
   if (error) {
     return (
-      <div style={styles.errorState}>
+      <div style={stateStyles.error}>
         <AlertTriangle size={48} style={{ marginBottom: '16px' }} />
         <h3 style={{ margin: '0 0 16px 0' }}>Error del Sistema</h3>
         <p style={{ marginBottom: '24px' }}>{error}</p>
-        <button onClick={loadInitialData} style={{
-          ...styles.button,
-          background: 'linear-gradient(45deg, #DC3545, #E85D75)'
-        }}>
+        <button 
+          onClick={loadInitialData} 
+          style={{
+            ...buttonStyles.base,
+            ...buttonStyles.primary,
+            background: 'linear-gradient(45deg, #DC3545, #E85D75)'
+          }}
+        >
           Reintentar Conexión
         </button>
       </div>
     );
   }
 
+  // Renderizado principal del dashboard
   return (
-    <div style={styles.container}>
-      {/* Header (MANTENER EXACTAMENTE IGUAL) */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>Dashboard Financiero</h1>
-        <p style={styles.subtitle}>
-          Bienvenido, <strong>{userInfo?.name}</strong> • Última actualización: {new Date().toLocaleTimeString()}
+    <div style={dashboardStyles.container}>
+      {/* Encabezado */}
+      <header style={dashboardStyles.header}>
+        <h1 style={dashboardStyles.title}>{APP_CONFIG.NAME}</h1>
+        <p style={dashboardStyles.subtitle}>
+          Bienvenido, <strong>{userInfo?.name}</strong> • {HELPERS.formatDate(new Date().toISOString())}
         </p>
-      </div>
+      </header>
 
-      {/* KPI Cards (MANTENER EXACTAMENTE IGUAL) */}
-      <div style={styles.kpiGrid}>
+      {/* Tarjetas de métricas clave (KPIs) */}
+      <section style={kpiStyles.grid} aria-label="Métricas principales">
         <KPICard
           icon={DollarSign}
           title="Volumen Total"
-          value={`$${totalVolume.toLocaleString()}`}
+          value={HELPERS.formatMoney(metrics.totalVolume)}
           subtitle="Todas las transacciones"
           trend={12.5}
         />
         <KPICard
           icon={Activity}
           title="Transacciones Totales"
-          value={transactions.length.toLocaleString()}
+          value={metrics.totalCount.toLocaleString()}
           subtitle="Historial completo"
         />
         <KPICard
           icon={TrendingUp}
           title="Promedio por Transacción"
-          value={`$${avgTransaction.toFixed(2)}`}
-          subtitle="Valor medio"
+          value={HELPERS.formatMoney(metrics.avgTransaction)}
+          subtitle="Valor promedio"
         />
         <KPICard
           icon={Clock}
           title="Últimas 24 Horas"
-          value={recentTransactions.toString()}
+          value={metrics.recentCount.toString()}
           subtitle="Actividad reciente"
           trend={8.3}
         />
-      </div>
+      </section>
 
-      {/* Charts Section (MANTENER EXACTAMENTE IGUAL) */}
+      {/* Gráficos de análisis */}
       {chartData.length > 0 && (
-        <div style={styles.chartsSection}>
-          <div style={styles.chartsGrid}>
-            {/* Gráfico de volumen */}
-            <div style={styles.chartCard}>
-              <h3 style={styles.chartTitle}>
+        <section style={chartStyles.section} aria-label="Gráficos de análisis">
+          <div style={chartStyles.grid}>
+            {/* Gráfico de área - Volumen por hora */}
+            <div style={chartStyles.card}>
+              <h3 style={chartStyles.title}>
                 <TrendingUp size={20} />
                 Volumen por Hora
               </h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <AreaChart data={chartData}>
+              <ResponsiveContainer width="100%" height={CHART_CONFIG.DIMENSIONS.DEFAULT_HEIGHT}>
+                <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <defs>
-                    <linearGradient id="volumeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#A98B51" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#A98B51" stopOpacity={0}/>
+                    <linearGradient id={CHART_CONFIG.GRADIENTS.AREA_FILL.id} x1="0" y1="0" x2="0" y2="1">
+                      {CHART_CONFIG.GRADIENTS.AREA_FILL.stops.map((stop, index) => (
+                        <stop 
+                          key={index} 
+                          offset={stop.offset} 
+                          stopColor={stop.color} 
+                          stopOpacity={stop.opacity} 
+                        />
+                      ))}
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(169, 139, 81, 0.1)" />
-                  <XAxis dataKey="time" stroke="rgba(255, 255, 255, 0.7)" fontSize={12} />
-                  <YAxis stroke="rgba(255, 255, 255, 0.7)" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_CONFIG.COLORS.GRID} />
+                  <XAxis 
+                    dataKey="time" 
+                    stroke={CHART_CONFIG.COLORS.AXIS} 
+                    fontSize={12}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke={CHART_CONFIG.COLORS.AXIS} 
+                    fontSize={12}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <Tooltip 
-                    contentStyle={{ 
-                      background: 'linear-gradient(135deg, #263B35, #162C2C)', 
-                      border: '1px solid rgba(169, 139, 81, 0.2)', 
-                      borderRadius: '8px',
-                      color: '#FFFFFF'
-                    }} 
+                    contentStyle={CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE}
+                    formatter={(value, name) => [HELPERS.formatMoney(value), 'Volumen']}
+                    labelFormatter={(label) => `Hora: ${label}`}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="volume" 
-                    stroke="#A98B51" 
+                    stroke={CHART_CONFIG.COLORS.PRIMARY} 
                     fillOpacity={1} 
-                    fill="url(#volumeGradient)" 
-                    strokeWidth={2} 
+                    fill={`url(#${CHART_CONFIG.GRADIENTS.AREA_FILL.id})`} 
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4, fill: CHART_CONFIG.COLORS.PRIMARY }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Gráfico de barras */}
-            <div style={styles.chartCard}>
-              <h3 style={styles.chartTitle}>
+            {/* Gráfico de barras - Cantidad de transacciones por hora */}
+            <div style={chartStyles.card}>
+              <h3 style={chartStyles.title}>
                 <Activity size={20} />
                 Transacciones por Hora
               </h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(169, 139, 81, 0.1)" />
-                  <XAxis dataKey="time" stroke="rgba(255, 255, 255, 0.7)" fontSize={10} />
-                  <YAxis stroke="rgba(255, 255, 255, 0.7)" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: 'linear-gradient(135deg, #263B35, #162C2C)', 
-                      border: '1px solid rgba(169, 139, 81, 0.2)', 
-                      borderRadius: '8px',
-                      color: '#FFFFFF'
-                    }} 
+              <ResponsiveContainer width="100%" height={CHART_CONFIG.DIMENSIONS.DEFAULT_HEIGHT}>
+                <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_CONFIG.COLORS.GRID} />
+                  <XAxis 
+                    dataKey="time" 
+                    stroke={CHART_CONFIG.COLORS.AXIS} 
+                    fontSize={10}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                  <Bar dataKey="transactions" fill="#A98B51" radius={[4, 4, 0, 0]} />
+                  <YAxis 
+                    stroke={CHART_CONFIG.COLORS.AXIS} 
+                    fontSize={12}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE}
+                    formatter={(value, name) => [value, 'Transacciones']}
+                    labelFormatter={(label) => `Hora: ${label}`}
+                  />
+                  <Bar 
+                    dataKey="transactions" 
+                    fill={CHART_CONFIG.COLORS.PRIMARY} 
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Sección de transacciones (SOLO MODIFICANDO EL BOTÓN PRINCIPAL) */}
-      <section style={styles.transactionsSection}>
-        <div style={styles.sectionHeader}>
-          <h3 style={styles.sectionTitle}>
+      {/* Sección de transacciones */}
+      <section style={transactionStyles.section} aria-label="Historial de transacciones">
+        <div style={transactionStyles.header}>
+          <h3 style={transactionStyles.title}>
             Historial de Transacciones
-            <span style={styles.badge}>{transactions.length}</span>
+            <span style={transactionStyles.badge}>{transactions.length}</span>
           </h3>
-          <div style={styles.buttonGroup}>
-            <button onClick={debugToken} style={{...styles.button, ...styles.buttonInfo}}>
-              <Eye size={16} />
-              Debug Token
-            </button>
+          
+          {/* Grupo de botones de acción */}
+          <div style={buttonStyles.group}>
+            {/* Botón de debug (solo en desarrollo) */}
+            {ENVIRONMENT.DEBUG.ENABLE_DEBUG_BUTTONS && (
+              <button 
+                onClick={debugToken} 
+                style={{...buttonStyles.base, ...buttonStyles.info}}
+                title="Mostrar información del token JWT"
+              >
+                <Eye size={16} />
+                Debug Token
+              </button>
+            )}
+            
+            {/* Botón para ver transacciones globales (admin) */}
             <button 
               onClick={fetchGlobalTransactions} 
               disabled={isAdminLoading} 
-              style={{...styles.button, ...styles.buttonSecondary}}
+              style={{...buttonStyles.base, ...buttonStyles.secondary}}
+              title="Ver todas las transacciones del sistema (requiere permisos de admin)"
             >
               <Users size={16} />
               {isAdminLoading ? "Cargando..." : "Ver Todas (Admin)"}
             </button>
-            <button onClick={createSampleTransaction} style={{...styles.button, ...styles.buttonSecondary}}>
-              <Activity size={16} />
-              Transacción Random
-            </button>
-            {/* MODIFICADO: Cambiar al modal UACJ */}
+            
+            {/* Botón principal para nueva transacción */}
             <button 
               onClick={() => setShowUACJTransactionModal(true)} 
-              style={styles.button}
+              style={{...buttonStyles.base, ...buttonStyles.primary}}
               disabled={isCreatingTransaction}
+              title="Crear nueva transferencia a usuarios UACJ"
             >
               <Plus size={16} />
               Nueva Transferencia UACJ
@@ -1213,23 +506,45 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Lista de transacciones (MANTENER EXACTAMENTE IGUAL) */}
+        {/* Lista de transacciones o estado vacío */}
         {transactions.length === 0 ? (
-          <div style={styles.emptyState}>
+          <div style={stateStyles.empty}>
             <DollarSign size={48} color="rgba(169, 139, 81, 0.5)" style={{ marginBottom: '16px' }} />
-            <p style={styles.emptyText}>No tienes transacciones aún.</p>
-            <p style={styles.emptySubtext}>Haz clic en "Nueva Transferencia UACJ" para comenzar.</p>
+            <p style={stateStyles.emptyText}>No tienes transacciones aún.</p>
+            <p style={stateStyles.emptySubtext}>
+              Haz clic en "Nueva Transferencia UACJ" para comenzar.
+            </p>
           </div>
         ) : (
-          <div style={styles.transactionsList}>
-            {transactions.slice(-8).reverse().map((transaction, index) => (
-              <TransactionItem key={transaction.id || index} transaction={transaction} index={index} />
-            ))}
+          <div style={transactionStyles.list}>
+            {transactions
+              .slice(-APP_CONFIG.MAX_RECENT_TRANSACTIONS)
+              .reverse()
+              .map((transaction, index) => (
+                <TransactionItem 
+                  key={transaction.id || `transaction-${index}`} 
+                  transaction={transaction} 
+                  index={index}
+                />
+              ))
+            }
+            
+            {/* Mostrar indicador si hay más transacciones */}
+            {transactions.length > APP_CONFIG.MAX_RECENT_TRANSACTIONS && (
+              <div style={{
+                textAlign: 'center',
+                padding: '20px',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.9rem'
+              }}>
+                Mostrando las últimas {APP_CONFIG.MAX_RECENT_TRANSACTIONS} transacciones de {transactions.length} total
+              </div>
+            )}
           </div>
         )}
       </section>
 
-      {/* NUEVO: Modal para transferencia UACJ (reemplazando el anterior) */}
+      {/* Modal para nueva transferencia UACJ */}
       <UACJTransactionModal
         isOpen={showUACJTransactionModal}
         onClose={() => setShowUACJTransactionModal(false)}
@@ -1237,7 +552,7 @@ function Dashboard() {
         isLoading={isCreatingTransaction}
       />
 
-      {/* Modal para transacciones globales (MANTENER EXACTAMENTE IGUAL) */}
+      {/* Modal para transacciones globales (admin) */}
       {globalTransactions && (
         <GlobalTransactionsModal
           transactions={globalTransactions}
