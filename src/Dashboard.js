@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+cimport React, { useState, useEffect, useCallback } from 'react';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
@@ -410,7 +410,7 @@ const modalStyles = {
   }
 };
 
-// Componentes (MANTENER EXACTAMENTE IGUAL)
+// Componentes 
 const KPICard = ({ icon: Icon, title, value, subtitle, trend, onClick }) => {
   const [hovered, setHovered] = useState(false);
   
@@ -768,53 +768,57 @@ function Dashboard() {
   }, [loadInitialData]);
 
   // NUEVA: Función para crear transacción con modal
-  const createTransactionWithForm = async (transactionData) => {
-    if (!accounts || accounts.length === 0 || !userInfo) {
-      setError("No hay información de usuario disponible");
-      return;
-    }
+const createTransactionWithForm = async (transactionData) => {
+  if (!accounts || accounts.length === 0 || !userInfo) {
+    setError("No hay información de usuario disponible");
+    return;
+  }
 
-    setIsCreatingTransaction(true);
-    try {
-      const request = { ...loginRequest, account: accounts[0] };
-      const tokenResponse = await instance.acquireTokenSilent(request);
-      
-      const newTransaction = {
-        fromAccountId: userInfo.id,
-        fromAccountName: userInfo.name,
-        toAccount: transactionData.recipient,
-        amount: transactionData.amount,
-        description: transactionData.description,
-        timestamp: new Date().toISOString()
-      };
+  setIsCreatingTransaction(true);
+  try {
+    const request = { ...loginRequest, account: accounts[0] };
+    const tokenResponse = await instance.acquireTokenSilent(request);
+    
+    const newTransaction = {
+      amount: transactionData.amount,
+      recipient: transactionData.recipient,  // CAMBIÉ: toAccount -> recipient
+      description: transactionData.description
+    };
 
-      const response = await fetch(
-        "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
-        {
-          method: "POST",
-          headers: { 
-            "Authorization": `Bearer ${tokenResponse.accessToken}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(newTransaction)
-        }
-      );
+    // DEBUG: Ver qué estamos enviando
+    console.log('Enviando datos:', newTransaction);
 
-      if (!response.ok) {
-        throw new Error(`Error al crear transacción: ${response.statusText}`);
+    const response = await fetch(
+      "https://apim-fintech-dev-jagm.azure-api.net/func-fintech-dev-jagm-v1/transactions",
+      {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${tokenResponse.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newTransaction)
       }
+    );
 
-      // Cerrar modal y recargar transacciones
-      setShowNewTransactionModal(false);
-      await fetchTransactions(tokenResponse.accessToken);
-      
-    } catch (err) {
-      console.error("Error al crear transacción:", err);
-      setError(`Error al crear transacción: ${err.message}`);
-    } finally {
-      setIsCreatingTransaction(false);
+    // DEBUG: Ver qué responde el servidor
+    const responseText = await response.text();
+    console.log('Respuesta del servidor:', responseText);
+
+    if (!response.ok) {
+      throw new Error(`Error al crear transacción: ${response.status} - ${responseText}`);
     }
-  };
+
+    // Cerrar modal y recargar transacciones
+    setShowNewTransactionModal(false);
+    await fetchTransactions(tokenResponse.accessToken);
+    
+  } catch (err) {
+    console.error("Error completo:", err);
+    setError(`Error al crear transacción: ${err.message}`);
+  } finally {
+    setIsCreatingTransaction(false);
+  }
+};
 
   // Todas tus funciones existentes (MANTENER EXACTAMENTE IGUAL)
   const createSampleTransaction = async () => {
