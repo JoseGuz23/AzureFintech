@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
 import Dashboard from "./Dashboard";
 import MainHub from "./MainHub";
 import ArchitecturePage from "./ArchitecturePage";
 import Header from "./Header";
- 
+
 const styles = {
   page: {
     display: 'flex',
@@ -29,17 +30,12 @@ const styles = {
 };
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('hub');
   const { instance, accounts } = useMsal();
-
-  const handleNavigation = (page) => {
-    setCurrentPage(page);
-  };
 
   const handleLogin = () => {
     instance.loginPopup(loginRequest)
       .then(() => {
-        setCurrentPage('dashboard');
+        // React Router manejará la navegación automáticamente
       })
       .catch(e => {
         console.error(e);
@@ -47,56 +43,56 @@ function App() {
   };
 
   const handleLogout = () => {
-    instance.logoutPopup();
-    setCurrentPage('hub');
+    if (window.confirm('¿Cerrar sesión en esta app?')) {
+      instance.clearCache();
+      window.location.reload();
+    }
   };
 
   const userName = accounts[0] && accounts[0].name;
 
   return (
-    <div>
-      <AuthenticatedTemplate>
-        <Header 
-          type="authenticated" 
-          onNavigate={handleNavigation}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-          userName={userName}
-        />
-        
-        {currentPage === 'dashboard' && (
-          <div style={styles.page}>
-            <div style={styles.dashboardCard}>
-              <Dashboard />
-            </div>
-          </div>
-        )}
-        
-        {currentPage === 'architecture' && (
-          <ArchitecturePage />
-        )}
-        
-        {currentPage === 'hub' && (
-          <MainHub onNavigate={handleNavigation} onLogin={handleLogin} />
-        )}
-      </AuthenticatedTemplate>
+    <Router>
+      <div>
+        <AuthenticatedTemplate>
+          <Header 
+            type="authenticated" 
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            userName={userName}
+          />
+          
+          <Routes>
+            <Route path="/" element={<MainHub onLogin={handleLogin} />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <div style={styles.page}>
+                  <div style={styles.dashboardCard}>
+                    <Dashboard />
+                  </div>
+                </div>
+              } 
+            />
+            <Route path="/architecture" element={<ArchitecturePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthenticatedTemplate>
 
-      <UnauthenticatedTemplate>
-        <Header 
-          type="public" 
-          onNavigate={handleNavigation}
-          onLogin={handleLogin}
-        />
-        
-        {currentPage === 'architecture' && (
-          <ArchitecturePage />
-        )}
-        
-        {currentPage !== 'architecture' && (
-          <MainHub onNavigate={handleNavigation} onLogin={handleLogin} />
-        )}
-      </UnauthenticatedTemplate>
-    </div>
+        <UnauthenticatedTemplate>
+          <Header 
+            type="public" 
+            onLogin={handleLogin}
+          />
+          
+          <Routes>
+            <Route path="/" element={<MainHub onLogin={handleLogin} />} />
+            <Route path="/architecture" element={<ArchitecturePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </UnauthenticatedTemplate>
+      </div>
+    </Router>
   );
 }
 

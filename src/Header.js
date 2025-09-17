@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const headerStyles = {
   header: {
@@ -26,14 +27,15 @@ const headerStyles = {
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    textDecoration: 'none'
   },
   navLinks: {
     display: 'flex',
     gap: '30px',
     alignItems: 'center'
   },
-  navButton: {
+  navLink: {
     color: 'rgba(255, 255, 255, 0.8)',
     background: 'none',
     border: 'none',
@@ -41,7 +43,14 @@ const headerStyles = {
     fontSize: '16px',
     transition: 'color 0.3s ease',
     cursor: 'pointer',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    textDecoration: 'none',
+    padding: '8px 12px',
+    borderRadius: '6px'
+  },
+  activeNavLink: {
+    color: '#A98B51',
+    backgroundColor: 'rgba(169, 139, 81, 0.1)'
   },
   button: {
     padding: '10px 20px',
@@ -52,7 +61,8 @@ const headerStyles = {
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: 600,
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    textDecoration: 'none'
   },
   logoutButton: {
     padding: '10px 20px',
@@ -66,29 +76,44 @@ const headerStyles = {
   }
 };
 
-function Header({ type, onNavigate, onLogin, onLogout, userName }) {
-  const handleLogoClick = () => {
-    onNavigate('hub');
-  };
+function Header({ type, onLogin, onLogout, userName }) {
+  const location = useLocation();
+  
+  const isActive = (path) => location.pathname === path;
 
   // Header para usuarios NO autenticados (MainHub + Architecture)
   if (type === 'public') {
     return (
       <header style={headerStyles.header}>
         <nav style={headerStyles.nav}>
-          <div style={headerStyles.logo} onClick={handleLogoClick}>
+          <Link to="/" style={headerStyles.logo}>
             FINTECH PRO
-          </div>
+          </Link>
           <div style={headerStyles.navLinks}>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('hub')}>
+            <Link 
+              to="/" 
+              style={{
+                ...headerStyles.navLink, 
+                ...(isActive('/') ? headerStyles.activeNavLink : {})
+              }}
+            >
               Servicios
-            </button>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('architecture')}>
+            </Link>
+            <Link 
+              to="/architecture" 
+              style={{
+                ...headerStyles.navLink, 
+                ...(isActive('/architecture') ? headerStyles.activeNavLink : {})
+              }}
+            >
               Arquitectura
-            </button>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('hub')}>
+            </Link>
+            <Link 
+              to="/" 
+              style={headerStyles.navLink}
+            >
               Casos de Éxito
-            </button>
+            </Link>
             <button style={headerStyles.button} onClick={onLogin}>
               Acceder al Sistema
             </button>
@@ -103,19 +128,37 @@ function Header({ type, onNavigate, onLogin, onLogout, userName }) {
     return (
       <header style={headerStyles.header}>
         <nav style={headerStyles.nav}>
-          <div style={headerStyles.logo} onClick={handleLogoClick}>
+          <Link to="/" style={headerStyles.logo}>
             FINTECH PRO
-          </div>
+          </Link>
           <div style={headerStyles.navLinks}>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('dashboard')}>
+            <Link 
+              to="/dashboard" 
+              style={{
+                ...headerStyles.navLink, 
+                ...(isActive('/dashboard') ? headerStyles.activeNavLink : {})
+              }}
+            >
               Dashboard
-            </button>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('architecture')}>
+            </Link>
+            <Link 
+              to="/architecture" 
+              style={{
+                ...headerStyles.navLink, 
+                ...(isActive('/architecture') ? headerStyles.activeNavLink : {})
+              }}
+            >
               Arquitectura
-            </button>
-            <button style={headerStyles.navButton} onClick={() => onNavigate('admin')}>
+            </Link>
+            <Link 
+              to="/" 
+              style={{
+                ...headerStyles.navLink, 
+                ...(isActive('/') ? headerStyles.activeNavLink : {})
+              }}
+            >
               Admin
-            </button>
+            </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                 Hola, <span style={{ color: '#A98B51', fontWeight: 600 }}>{userName}</span>

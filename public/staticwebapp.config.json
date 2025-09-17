@@ -1,0 +1,37 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*.{png,jpg,jpeg,gif,svg}", "/css/*", "/js/*", "/*.{png,jpg,jpeg,gif,svg,ico,css,js}"]
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/",
+      "statusCode": 302
+    },
+    "403": {
+      "redirect": "/",
+      "statusCode": 302
+    }
+  },
+  "globalHeaders": {
+    "content-security-policy": "default-src https: 'unsafe-inline' 'unsafe-eval'; object-src 'none'"
+  },
+  "auth": {
+    "rolesSource": "/api/GetRoles",
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/{your-tenant-id}/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
+        }
+      }
+    }
+  }
+}
