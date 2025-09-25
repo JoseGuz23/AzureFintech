@@ -1,128 +1,175 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const styles = {
-  body: {
-    fontFamily: "'Inter', sans-serif",
-    background: 'linear-gradient(135deg, #0C1010 0%, #111F20 50%, #162C2C 100%)',
-    color: '#FFFFFF',
-    lineHeight: 1.6,
-    margin: 0,
-    minHeight: '100vh',
-    paddingTop: '100px' // Espacio para el header fijo
-  },
-  mainContent: {
-    minHeight: '100vh'
-  },
-  pageHeader: {
-    textAlign: 'center',
-    padding: '40px 20px',
-    maxWidth: '1200px',
-    margin: '0 auto'
-  },
-  pageTitle: {
-    fontSize: '3rem',
-    fontWeight: 700,
-    marginBottom: '20px',
-    background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  pageSubtitle: {
-    fontSize: '1.2rem',
-    color: 'rgba(255, 255, 255, 0.8)',
-    maxWidth: '800px',
-    margin: '0 auto'
-  },
-  diagramContainer: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    borderRadius: '20px',
-    padding: '40px',
-    margin: '40px auto',
-    maxWidth: '1200px',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
-  },
-  diagramTitle: {
-    textAlign: 'center',
-    fontSize: '1.8rem',
-    fontWeight: 600,
-    marginBottom: '30px',
-    color: '#A98B51'
-  },
-  diagramImage: {
-    maxWidth: '100%',
-    height: 'auto',
-    borderRadius: '12px',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
-  },
-  legend: {
-    marginTop: '30px',
-    padding: '20px',
-    background: 'rgba(169,139,81,0.1)',
-    borderRadius: '8px'
-  },
-  legendTitle: {
-    color: '#A98B51',
-    fontSize: '1.2rem',
-    marginBottom: '15px'
-  },
-  legendGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '15px',
-    color: 'rgba(255,255,255,0.8)'
-  },
-  technicalDetails: {
-    maxWidth: '1200px',
-    margin: '60px auto',
-    padding: '0 20px'
-  },
-  detailsTitle: {
-    textAlign: 'center',
-    fontSize: '2.5rem',
-    marginBottom: '40px',
-    background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  detailsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: '30px',
-    marginTop: '40px'
-  },
-  detailCard: {
-    background: 'linear-gradient(135deg, #263B35, #162C2C)',
-    padding: '30px',
-    borderRadius: '16px',
-    border: '1px solid rgba(169, 139, 81, 0.2)',
-    transition: 'all 0.3s ease'
-  },
-  detailTitle: {
-    color: '#A98B51',
-    fontSize: '1.4rem',
-    fontWeight: 600,
-    marginBottom: '15px'
-  },
-  detailText: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: '15px'
-  },
-  techList: {
-    listStyle: 'none',
-    padding: 0
-  },
-  techItem: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: '8px',
-    position: 'relative',
-    paddingLeft: '20px'
-  }
-};
+const ArchitecturePage = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
-function ArchitecturePage() {
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1024 && window.innerWidth > 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const styles = {
+    body: {
+      fontFamily: "'Inter', sans-serif",
+      background: 'linear-gradient(135deg, #0C1010 0%, #111F20 50%, #162C2C 100%)',
+      color: '#FFFFFF',
+      lineHeight: 1.6,
+      margin: 0,
+      minHeight: '100vh',
+      paddingTop: isMobile ? '80px' : '100px',
+      overflow: 'hidden'
+    },
+    
+    mainContent: {
+      minHeight: '100vh'
+    },
+    
+    pageHeader: {
+      textAlign: 'center',
+      padding: isMobile ? '30px 20px' : isTablet ? '35px 30px' : '40px 20px',
+      maxWidth: '1200px',
+      margin: '0 auto'
+    },
+    
+    pageTitle: {
+      fontSize: isMobile ? '2rem' : isTablet ? '2.5rem' : '3rem',
+      fontWeight: 700,
+      marginBottom: '20px',
+      background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      lineHeight: isMobile ? 1.1 : 1.2
+    },
+    
+    pageSubtitle: {
+      fontSize: isMobile ? '1rem' : isTablet ? '1.1rem' : '1.2rem',
+      color: 'rgba(255, 255, 255, 0.8)',
+      maxWidth: '800px',
+      margin: '0 auto'
+    },
+    
+    diagramContainer: {
+      background: 'linear-gradient(135deg, #263B35, #162C2C)',
+      borderRadius: isMobile ? '12px' : '20px',
+      padding: isMobile ? '20px 15px' : isTablet ? '30px 20px' : '40px',
+      margin: isMobile ? '20px 15px' : isTablet ? '30px 20px' : '40px auto',
+      maxWidth: '1200px',
+      border: '1px solid rgba(169, 139, 81, 0.2)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+    },
+    
+    diagramTitle: {
+      textAlign: 'center',
+      fontSize: isMobile ? '1.3rem' : isTablet ? '1.5rem' : '1.8rem',
+      fontWeight: 600,
+      marginBottom: isMobile ? '20px' : '30px',
+      color: '#A98B51'
+    },
+    
+    diagramImageContainer: {
+      textAlign: 'center', 
+      padding: isMobile ? '10px' : '20px',
+      overflowX: 'auto',
+      marginBottom: '20px'
+    },
+    
+    diagramImage: {
+      maxWidth: '100%',
+      height: 'auto',
+      borderRadius: '12px',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+      minWidth: isMobile ? '300px' : 'auto', // Mantiene legibilidad en móvil
+      display: 'block',
+      margin: '0 auto'
+    },
+    
+    legend: {
+      marginTop: isMobile ? '20px' : '30px',
+      padding: isMobile ? '15px' : '20px',
+      background: 'rgba(169,139,81,0.1)',
+      borderRadius: '8px'
+    },
+    
+    legendTitle: {
+      color: '#A98B51',
+      fontSize: isMobile ? '1rem' : '1.2rem',
+      marginBottom: '15px'
+    },
+    
+    legendGrid: {
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: isMobile ? '10px' : '15px',
+      color: 'rgba(255,255,255,0.8)',
+      fontSize: isMobile ? '0.9rem' : '1rem'
+    },
+    
+    technicalDetails: {
+      maxWidth: '1200px',
+      margin: isMobile ? '40px auto' : isTablet ? '50px auto' : '60px auto',
+      padding: isMobile ? '0 15px' : '0 20px'
+    },
+    
+    detailsTitle: {
+      textAlign: 'center',
+      fontSize: isMobile ? '1.8rem' : isTablet ? '2.2rem' : '2.5rem',
+      marginBottom: isMobile ? '30px' : '40px',
+      background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text'
+    },
+    
+    detailsGrid: {
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(auto-fit, minmax(280px, 1fr))' : 'repeat(auto-fit, minmax(350px, 1fr))',
+      gap: isMobile ? '20px' : isTablet ? '25px' : '30px',
+      marginTop: isMobile ? '30px' : '40px'
+    },
+    
+    detailCard: {
+      background: 'linear-gradient(135deg, #263B35, #162C2C)',
+      padding: isMobile ? '20px 15px' : isTablet ? '25px 20px' : '30px',
+      borderRadius: '16px',
+      border: '1px solid rgba(169, 139, 81, 0.2)',
+      transition: 'all 0.3s ease'
+    },
+    
+    detailTitle: {
+      color: '#A98B51',
+      fontSize: isMobile ? '1.2rem' : '1.4rem',
+      fontWeight: 600,
+      marginBottom: '15px'
+    },
+    
+    detailText: {
+      color: 'rgba(255, 255, 255, 0.8)',
+      marginBottom: '15px',
+      fontSize: isMobile ? '0.95rem' : '1rem'
+    },
+    
+    techList: {
+      listStyle: 'none',
+      padding: 0
+    },
+    
+    techItem: {
+      color: 'rgba(255, 255, 255, 0.7)',
+      marginBottom: '8px',
+      position: 'relative',
+      paddingLeft: '20px',
+      fontSize: isMobile ? '0.9rem' : '1rem'
+    }
+  };
+
   return (
     <div style={styles.body}>
       {/* Main Content */}
@@ -139,8 +186,12 @@ function ArchitecturePage() {
         <section style={styles.diagramContainer}>
           <h2 style={styles.diagramTitle}>Diagrama de Arquitectura</h2>
           
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <img src="/Arquitecture.png" alt="Diagrama Arquitectura" style={styles.diagramImage} />
+          <div style={styles.diagramImageContainer}>
+            <img 
+              src="/Arquitecture.png" 
+              alt="Diagrama de Arquitectura Azure para Fintech" 
+              style={styles.diagramImage} 
+            />
           </div>
 
           {/* Leyenda del diagrama */}
@@ -242,6 +293,6 @@ function ArchitecturePage() {
       </main>
     </div>
   );
-}
+};
 
 export default ArchitecturePage;

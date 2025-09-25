@@ -1,4 +1,4 @@
-// src/Dashboard.js - Versión Final Limpia y Optimizada
+// src/Dashboard.js - Versión Desktop Profesional Corregida
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
@@ -17,11 +17,7 @@ import {
 } from './config';
 
 import { 
-  dashboardStyles, 
-  kpiStyles, 
-  chartStyles, 
   transactionStyles, 
-  buttonStyles, 
   stateStyles,
   colors 
 } from './styles/theme';
@@ -29,7 +25,6 @@ import {
 // Importar todos los componentes de una vez
 import { 
   KPICard, 
-  TransactionItem, 
   UACJTransactionModal, 
   GlobalTransactionsModal 
 } from './components';
@@ -69,6 +64,34 @@ const processTransactionsForChart = (transactions) => {
 };
 
 /**
+ * Componente mejorado para mostrar cada transacción
+ */
+const ImprovedTransactionItem = ({ transaction, index, isMobile }) => {
+  return (
+    <div className="transaction-item">
+      <div className="transaction-left">
+        <div className="transaction-icon">
+          <Plus size={isMobile ? 14 : 18} color={colors.primary} />
+        </div>
+        <div className="transaction-info">
+          <h4 className="transaction-description">
+            Transacción #{index + 1}
+          </h4>
+          <p className="transaction-date">
+            {HELPERS.formatDate(transaction.timestamp)}
+          </p>
+        </div>
+      </div>
+      <div className="transaction-right">
+        <div className="transaction-amount">
+          {HELPERS.formatMoney(Math.abs(transaction.amount || 0))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
  * Componente principal del Dashboard
  */
 function Dashboard() {
@@ -86,6 +109,21 @@ function Dashboard() {
   // Estados para operaciones en progreso
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
+
+  // ✅ Estado para responsive design
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ✅ Detectar tamaño de pantalla
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   /**
    * Obtiene las transacciones del usuario desde la API
@@ -288,71 +326,109 @@ Tenant: ${payload.tid || 'N/A'}
   // Renderizado condicional para estados de carga y error
   if (loading) {
     return (
-      <div style={stateStyles.loading}>
-        <div style={stateStyles.loadingIcon}>
-          <Activity size={48} />
+      <div className="dashboard-container">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '400px',
+          textAlign: 'center'
+        }}>
+          <Activity size={isMobile ? 40 : 60} color="#A98B51" style={{ marginBottom: '20px' }} />
+          <h3 style={{ 
+            color: colors.white, 
+            margin: '0 0 12px 0',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            fontWeight: '600'
+          }}>
+            Cargando Dashboard Financiero
+          </h3>
+          <p style={{ 
+            color: 'rgba(255, 255, 255, 0.7)', 
+            margin: 0,
+            fontSize: isMobile ? '1rem' : '1.1rem'
+          }}>
+            Conectando con Azure Functions...
+          </p>
         </div>
-        <h3 style={{ color: colors.white, margin: '16px 0 8px 0' }}>
-          Cargando Dashboard
-        </h3>
-        <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0 }}>
-          Conectando con Azure Functions...
-        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={stateStyles.error}>
-        <AlertTriangle size={48} style={{ marginBottom: '16px' }} />
-        <h3 style={{ margin: '0 0 16px 0' }}>Error del Sistema</h3>
-        <p style={{ marginBottom: '24px' }}>{error}</p>
-        <button 
-          onClick={loadInitialData} 
-          style={{
-            ...buttonStyles.base,
-            ...buttonStyles.primary,
-            background: 'linear-gradient(45deg, #DC3545, #E85D75)'
-          }}
-        >
-          Reintentar Conexión
-        </button>
+      <div className="dashboard-container">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '400px',
+          textAlign: 'center'
+        }}>
+          <AlertTriangle size={isMobile ? 40 : 60} color="#DC3545" style={{ marginBottom: '20px' }} />
+          <h3 style={{ 
+            margin: '0 0 16px 0',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            color: '#DC3545',
+            fontWeight: '600'
+          }}>Error del Sistema</h3>
+          <p style={{ 
+            marginBottom: '24px',
+            fontSize: isMobile ? '1rem' : '1.1rem',
+            color: 'rgba(255, 255, 255, 0.8)',
+            maxWidth: '600px'
+          }}>{error}</p>
+          <button 
+            onClick={loadInitialData} 
+            className="dashboard-button"
+            style={{
+              background: 'linear-gradient(45deg, #DC3545, #E85D75)',
+              color: 'white'
+            }}
+          >
+            Reintentar Conexión
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Renderizado principal del dashboard
+  // ✅ Renderizado principal del dashboard - SIN wrapper problemático
   return (
-    <div style={dashboardStyles.container}>
+    <div className="dashboard-container">
       {/* Encabezado */}
-      <header style={dashboardStyles.header}>
-        <h1 style={dashboardStyles.title}>{APP_CONFIG.NAME}</h1>
-        <p style={dashboardStyles.subtitle}>
+      <header className="dashboard-header">
+        <h1 className="dashboard-title">{APP_CONFIG.NAME}</h1>
+        <p className="dashboard-subtitle">
           Bienvenido, <strong>{userInfo?.name}</strong> • {HELPERS.formatDate(new Date().toISOString())}
         </p>
       </header>
 
       {/* Tarjetas de métricas clave (KPIs) */}
-      <section style={kpiStyles.grid} aria-label="Métricas principales">
+      <section className="kpi-grid" aria-label="Métricas principales">
         <KPICard
           icon={DollarSign}
           title="Volumen Total"
           value={HELPERS.formatMoney(metrics.totalVolume)}
           subtitle="Todas las transacciones"
           trend={12.5}
+          isMobile={isMobile}
         />
         <KPICard
           icon={Activity}
           title="Transacciones Totales"
           value={metrics.totalCount.toLocaleString()}
           subtitle="Historial completo"
+          isMobile={isMobile}
         />
         <KPICard
           icon={TrendingUp}
           title="Promedio por Transacción"
           value={HELPERS.formatMoney(metrics.avgTransaction)}
           subtitle="Valor promedio"
+          isMobile={isMobile}
         />
         <KPICard
           icon={Clock}
@@ -360,21 +436,31 @@ Tenant: ${payload.tid || 'N/A'}
           value={metrics.recentCount.toString()}
           subtitle="Actividad reciente"
           trend={8.3}
+          isMobile={isMobile}
         />
       </section>
 
       {/* Gráficos de análisis */}
       {chartData.length > 0 && (
-        <section style={chartStyles.section} aria-label="Gráficos de análisis">
-          <div style={chartStyles.grid}>
+        <section className="charts-section" aria-label="Gráficos de análisis">
+          <div className="charts-grid">
             {/* Gráfico de área - Volumen por hora */}
-            <div style={chartStyles.card}>
-              <h3 style={chartStyles.title}>
-                <TrendingUp size={20} />
+            <div className="chart-card">
+              <h3 className="chart-title">
+                <TrendingUp size={isMobile ? 18 : 24} />
                 Volumen por Hora
               </h3>
-              <ResponsiveContainer width="100%" height={CHART_CONFIG.DIMENSIONS.DEFAULT_HEIGHT}>
-                <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <ResponsiveContainer 
+                width="100%" 
+                height={isMobile ? 220 : 320}
+                className="recharts-responsive-container"
+              >
+                <AreaChart data={chartData} margin={{ 
+                  top: 10, 
+                  right: isMobile ? 10 : 30, 
+                  left: isMobile ? 10 : 20, 
+                  bottom: 10 
+                }}>
                   <defs>
                     <linearGradient id={CHART_CONFIG.GRADIENTS.AREA_FILL.id} x1="0" y1="0" x2="0" y2="1">
                       {CHART_CONFIG.GRADIENTS.AREA_FILL.stops.map((stop, index) => (
@@ -391,18 +477,21 @@ Tenant: ${payload.tid || 'N/A'}
                   <XAxis 
                     dataKey="time" 
                     stroke={CHART_CONFIG.COLORS.AXIS} 
-                    fontSize={12}
+                    fontSize={isMobile ? 11 : 13}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis 
                     stroke={CHART_CONFIG.COLORS.AXIS} 
-                    fontSize={12}
+                    fontSize={isMobile ? 11 : 13}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip 
-                    contentStyle={CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE}
+                    contentStyle={{
+                      ...CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE,
+                      fontSize: isMobile ? '13px' : '14px'
+                    }}
                     formatter={(value, name) => [HELPERS.formatMoney(value), 'Volumen']}
                     labelFormatter={(label) => `Hora: ${label}`}
                   />
@@ -412,46 +501,58 @@ Tenant: ${payload.tid || 'N/A'}
                     stroke={CHART_CONFIG.COLORS.PRIMARY} 
                     fillOpacity={1} 
                     fill={`url(#${CHART_CONFIG.GRADIENTS.AREA_FILL.id})`} 
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     dot={false}
-                    activeDot={{ r: 4, fill: CHART_CONFIG.COLORS.PRIMARY }}
+                    activeDot={{ r: isMobile ? 4 : 5, fill: CHART_CONFIG.COLORS.PRIMARY }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
             {/* Gráfico de barras - Cantidad de transacciones por hora */}
-            <div style={chartStyles.card}>
-              <h3 style={chartStyles.title}>
-                <Activity size={20} />
+            <div className="chart-card">
+              <h3 className="chart-title">
+                <Activity size={isMobile ? 18 : 24} />
                 Transacciones por Hora
               </h3>
-              <ResponsiveContainer width="100%" height={CHART_CONFIG.DIMENSIONS.DEFAULT_HEIGHT}>
-                <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <ResponsiveContainer 
+                width="100%" 
+                height={isMobile ? 220 : 320}
+                className="recharts-responsive-container"
+              >
+                <BarChart data={chartData} margin={{ 
+                  top: 10, 
+                  right: isMobile ? 10 : 30, 
+                  left: isMobile ? 10 : 20, 
+                  bottom: 10 
+                }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={CHART_CONFIG.COLORS.GRID} />
                   <XAxis 
                     dataKey="time" 
                     stroke={CHART_CONFIG.COLORS.AXIS} 
-                    fontSize={10}
+                    fontSize={isMobile ? 10 : 12}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis 
                     stroke={CHART_CONFIG.COLORS.AXIS} 
-                    fontSize={12}
+                    fontSize={isMobile ? 11 : 13}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip 
-                    contentStyle={CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE}
+                    contentStyle={{
+                      ...CHART_CONFIG.DIMENSIONS.TOOLTIP_STYLE,
+                      fontSize: isMobile ? '13px' : '14px'
+                    }}
                     formatter={(value, name) => [value, 'Transacciones']}
                     labelFormatter={(label) => `Hora: ${label}`}
                   />
                   <Bar 
                     dataKey="transactions" 
                     fill={CHART_CONFIG.COLORS.PRIMARY} 
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={40}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={isMobile ? 35 : 45}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -462,23 +563,27 @@ Tenant: ${payload.tid || 'N/A'}
 
       {/* Sección de transacciones */}
       <section style={transactionStyles.section} aria-label="Historial de transacciones">
-        <div style={transactionStyles.header}>
-          <h3 style={transactionStyles.title}>
+        <div className="transaction-header">
+          <h3 className="transaction-title">
             Historial de Transacciones
-            <span style={transactionStyles.badge}>{transactions.length}</span>
+            <span className="transaction-badge">{transactions.length}</span>
           </h3>
           
           {/* Grupo de botones de acción */}
-          <div style={buttonStyles.group}>
+          <div className="button-group">
             {/* Botón de debug (solo en desarrollo) */}
             {ENVIRONMENT.DEBUG.ENABLE_DEBUG_BUTTONS && (
               <button 
                 onClick={debugToken} 
-                style={{...buttonStyles.base, ...buttonStyles.info}}
+                className="dashboard-button"
+                style={{
+                  background: 'linear-gradient(45deg, #17A2B8, #3FBDCF)',
+                  color: 'white'
+                }}
                 title="Mostrar información del token JWT"
               >
                 <Eye size={16} />
-                Debug Token
+                Debug
               </button>
             )}
             
@@ -486,33 +591,62 @@ Tenant: ${payload.tid || 'N/A'}
             <button 
               onClick={fetchGlobalTransactions} 
               disabled={isAdminLoading} 
-              style={{...buttonStyles.base, ...buttonStyles.secondary}}
+              className="dashboard-button"
+              style={{
+                background: 'linear-gradient(45deg, #6C757D, #ADB5BD)',
+                color: 'white'
+              }}
               title="Ver todas las transacciones del sistema (requiere permisos de admin)"
             >
               <Users size={16} />
-              {isAdminLoading ? "Cargando..." : "Ver Todas (Admin)"}
+              {isAdminLoading ? "Cargando..." : "Admin"}
             </button>
             
-            {/* Botón principal para nueva transacción */}
+            {/* ✅ BOTÓN PRINCIPAL CORREGIDO */}
             <button 
               onClick={() => setShowUACJTransactionModal(true)} 
-              style={{...buttonStyles.base, ...buttonStyles.primary}}
+              className="dashboard-button"
+              style={{
+                background: 'linear-gradient(45deg, #A98B51, #D4AF37)',
+                color: 'white'
+              }}
               disabled={isCreatingTransaction}
               title="Crear nueva transferencia a usuarios UACJ"
             >
               <Plus size={16} />
-              Nueva Transferencia UACJ
+              {isMobile ? "Nueva Transacción" : "Nueva Transferencia UACJ"}
             </button>
           </div>
         </div>
 
         {/* Lista de transacciones o estado vacío */}
         {transactions.length === 0 ? (
-          <div style={stateStyles.empty}>
-            <DollarSign size={48} color="rgba(169, 139, 81, 0.5)" style={{ marginBottom: '16px' }} />
-            <p style={stateStyles.emptyText}>No tienes transacciones aún.</p>
-            <p style={stateStyles.emptySubtext}>
-              Haz clic en "Nueva Transferencia UACJ" para comenzar.
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '300px',
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #162C2C, #263B35)',
+            borderRadius: '16px',
+            border: '2px dashed rgba(169, 139, 81, 0.3)',
+            padding: isMobile ? '40px 20px' : '60px 40px'
+          }}>
+            <DollarSign size={isMobile ? 48 : 64} color="rgba(169, 139, 81, 0.5)" style={{ marginBottom: '20px' }} />
+            <h3 style={{
+              color: '#FFFFFF',
+              fontSize: isMobile ? '1.2rem' : '1.5rem',
+              fontWeight: '600',
+              margin: '0 0 12px 0'
+            }}>No tienes transacciones aún</h3>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: isMobile ? '1rem' : '1.1rem',
+              margin: 0,
+              maxWidth: '400px'
+            }}>
+              Haz clic en "Nueva Transferencia UACJ" para comenzar a usar el sistema.
             </p>
           </div>
         ) : (
@@ -521,10 +655,11 @@ Tenant: ${payload.tid || 'N/A'}
               .slice(-APP_CONFIG.MAX_RECENT_TRANSACTIONS)
               .reverse()
               .map((transaction, index) => (
-                <TransactionItem 
+                <ImprovedTransactionItem 
                   key={transaction.id || `transaction-${index}`} 
                   transaction={transaction} 
                   index={index}
+                  isMobile={isMobile}
                 />
               ))
             }
@@ -533,9 +668,11 @@ Tenant: ${payload.tid || 'N/A'}
             {transactions.length > APP_CONFIG.MAX_RECENT_TRANSACTIONS && (
               <div style={{
                 textAlign: 'center',
-                padding: '20px',
+                padding: isMobile ? '20px' : '30px',
                 color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '0.9rem'
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                borderTop: '1px solid rgba(169, 139, 81, 0.1)',
+                marginTop: '20px'
               }}>
                 Mostrando las últimas {APP_CONFIG.MAX_RECENT_TRANSACTIONS} transacciones de {transactions.length} total
               </div>
@@ -550,6 +687,7 @@ Tenant: ${payload.tid || 'N/A'}
         onClose={() => setShowUACJTransactionModal(false)}
         onSubmit={createUACJTransaction}
         isLoading={isCreatingTransaction}
+        isMobile={isMobile}
       />
 
       {/* Modal para transacciones globales (admin) */}
@@ -557,6 +695,7 @@ Tenant: ${payload.tid || 'N/A'}
         <GlobalTransactionsModal
           transactions={globalTransactions}
           onClose={() => setGlobalTransactions(null)}
+          isMobile={isMobile}
         />
       )}
     </div>

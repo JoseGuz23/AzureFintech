@@ -1,103 +1,1073 @@
-/* Variables básicas */
-:root {
-  --primary: #162C2C;
-  --secondary: #263B35;
-  --dark: #111F20;
-  --accent: #A98B51;
-  --white: #FFFFFF;
-  --success: #28A745;
-  --error: #DC3545;
-}
+/* ==================== DASHBOARD DESKTOP PROFESIONAL ==================== */
 
-/* Reset básico */
+/* ✅ FIX 1: Fuentes del sistema globales - CONSISTENTES */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
 }
 
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: var(--dark);
-  color: var(--white);
-  line-height: 1.6;
+body, html {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  background-color: #0C1010 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  color: #FFFFFF !important;
+  line-height: 1.6 !important;
 }
 
-/* Botones básicos */
-button {
-  font-family: inherit;
-  transition: all 0.3s ease;
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  overflow-x: hidden !important;
 }
 
-button:hover {
-  opacity: 0.9;
+/* ✅ FIX 2: Layout desktop profesional - SIN wrapper que estorba */
+.dashboard-container {
+  margin: 0 auto !important;
+  padding: 40px 20px !important;
+  padding-top: 120px !important; /* Espacio para header fijo */
+  max-width: 1400px !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+  background: linear-gradient(135deg, #0C1010 0%, #111F20 50%, #162C2C 100%) !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* ✅ FIX 3: Header responsive mejorado */
+.dashboard-header {
+  width: 100% !important;
+  padding: 0 0 40px 0 !important;
+  margin-bottom: 40px !important;
+  text-align: center !important;
+  border-bottom: 1px solid rgba(169, 139, 81, 0.1) !important;
 }
 
-/* Scrollbar simple */
-::-webkit-scrollbar {
-  width: 8px;
+.dashboard-title {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  background: linear-gradient(45deg, #FFFFFF, #A98B51) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 0 15px 0 !important;
+  letter-spacing: -0.5px !important;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--dark);
+.dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 4px;
+/* ✅ FIX 4: KPIs más espaciosos en desktop */
+.kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px !important;
+  margin-bottom: 50px !important;
 }
 
-/* Responsive design básico */
+/* ✅ FIX 5: Gráficas más grandes y espaciosas */
+.charts-section {
+  width: 100% !important;
+  overflow: hidden !important;
+  margin-bottom: 50px !important;
+}
+
+.charts-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 30px !important;
+  width: 100% !important;
+}
+
+.chart-card {
+  background: linear-gradient(135deg, #263B35, #162C2C) !important;
+  border-radius: 20px !important;
+  padding: 30px !important;
+  border: 1px solid rgba(169, 139, 81, 0.2) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.chart-title {
+  color: #FFFFFF !important; /* ✅ FIJO: Títulos blancos */
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 20px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* ✅ FIX 6: Transacciones mejoradas */
+.transaction-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px !important;
+  margin-bottom: 12px !important;
+  background: linear-gradient(135deg, #162C2C, #111F20) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(169, 139, 81, 0.1) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  min-height: 80px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.transaction-item:hover {
+  border-color: rgba(169, 139, 81, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.transaction-left {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding-right: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+.transaction-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.transaction-right {
+  flex-shrink: 0 !important;
+  min-width: 120px !important;
+  text-align: right !important;
+}
+
+.transaction-amount {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
+  color: #A98B51 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+}
+
+.transaction-description {
+  color: #FFFFFF !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 6px 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.transaction-date {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem !important;
+  margin: 0 !important;
+}
+
+.transaction-icon {
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(45deg, rgba(169, 139, 81, 0.2), rgba(169, 139, 81, 0.3)) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* ✅ FIX 7: Header de transacciones más espacioso */
+.transaction-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 30px !important;
+  padding: 0 0 20px 0 !important;
+  border-bottom: 1px solid rgba(169, 139, 81, 0.1) !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+}
+
+.transaction-title {
+  color: #FFFFFF !important;
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.transaction-badge {
+  background: rgba(169, 139, 81, 0.2) !important;
+  color: #A98B51 !important;
+  padding: 6px 16px !important;
+  border-radius: 20px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+.button-group {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.dashboard-button {
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dashboard-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dashboard-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* ✅ FIX 8: Modal más grande */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 20px !important;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #263B35, #162C2C) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(169, 139, 81, 0.2) !important;
+  width: 90% !important;
+  max-width: 600px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  padding: 30px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ✅ FIX 9: Recharts más grandes */
+.recharts-responsive-container {
+  width: 100% !important;
+  height: 320px !important;
+}
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+
+/* Large Desktop: 1200px+ */
+@media (min-width: 1200px) {
+  .dashboard-container {
+    padding: 60px 40px !important;
+    padding-top: 140px !important;
+  }
+  
+  .kpi-grid {
+    gap: 30px !important;
+    margin-bottom: 60px !important;
+  }
+  
+  .charts-grid {
+    gap: 40px !important;
+  }
+  
+  .chart-card {
+    padding: 40px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 350px !important;
+  }
+}
+
+/* Tablet: 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-container {
+    padding: 30px 15px !important;
+    padding-top: 130px !important;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 2.2rem !important;
+  }
+  
+  .charts-grid {
+    gap: 25px !important;
+  }
+  
+  .chart-card {
+    padding: 25px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 280px !important;
+  }
+  
+  .transaction-amount {
+    font-size: 1rem !important;
+  }
+}
+
+/* Mobile: Hasta 768px */
 @media (max-width: 768px) {
+  
+  .dashboard-container {
+    padding: 20px 15px !important;
+    padding-top: 120px !important;
+  }
+  
+  .dashboard-header {
+    padding: 0 0 25px 0 !important;
+    margin-bottom: 25px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 1.8rem !important;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+    margin-bottom: 30px !important;
+  }
+  
+  .charts-section {
+    margin-bottom: 30px !important;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .chart-card {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+  
+  .chart-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 15px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 220px !important;
+  }
+  
+  .transaction-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    margin-bottom: 25px !important;
+  }
+  
+  .transaction-title {
+    font-size: 1.3rem !important;
+    justify-content: center !important;
+  }
+  
   .button-group {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+  
+  .dashboard-button {
+    width: 100% !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
   }
   
   .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 18px !important;
+    min-height: auto !important;
+    gap: 15px !important;
+  }
+  
+  .transaction-left {
+    width: 100% !important;
+    padding-right: 0 !important;
+  }
+  
+  .transaction-right {
+    width: 100% !important;
+    text-align: left !important;
+    min-width: unset !important;
+  }
+  
+  .transaction-amount {
+    font-size: 1.2rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+  
+  .transaction-description {
+    font-size: 1rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+  
+  .transaction-date {
+    font-size: 0.85rem !important;
+  }
+  
+  .transaction-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  
+  .modal-overlay {
+    padding: 10px !important;
   }
   
   .modal-content {
-    width: 95%;
-    padding: 20px;
+    width: 95% !important;
+    padding: 25px !important;
+    max-width: none !important;
   }
 }
 
-/* Utilidades básicas */
-.text-center {
-  text-align: center;
+/* Mobile pequeño: Hasta 480px */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 15px 10px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 1.6rem !important;
+  }
+  
+  .transaction-item {
+    padding: 15px !important;
+  }
+  
+  .transaction-amount {
+    font-size: 1.1rem !important;
+  }
+  
+  .chart-card {
+    padding: 15px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 200px !important;
+  }
+  
+  .modal-content {
+    padding: 20px !important;
+  }
+}
+/* ==================== DASHBOARD ANCHO COMPLETO ==================== */
+
+/* ✅ FIX 1: Fuentes del sistema globales */
+* {
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
 }
 
-.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+body, html {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  background-color: #0C1010 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  color: #FFFFFF !important;
+  line-height: 1.6 !important;
 }
 
-.flex-wrap {
-  flex-wrap: wrap;
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  overflow-x: hidden !important;
 }
 
-.mb-1 {
-  margin-bottom: 0.5rem;
+/* ✅ FIX 2: Dashboard ANCHO COMPLETO - Sin limitaciones */
+.dashboard-container {
+  margin: 0 auto !important;
+  padding: 40px 20px !important;
+  padding-top: 120px !important; /* Espacio para header fijo */
+  max-width: none !important; /* ✅ ELIMINADO: Sin límite de ancho */
+  width: 100% !important;
+  min-height: 100vh !important;
+  background: transparent !important; /* El fondo ya lo maneja App.js */
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
 }
 
-.mb-2 {
-  margin-bottom: 1rem;
+/* ✅ FIX 3: Header responsive y espacioso */
+.dashboard-header {
+  width: 100% !important;
+  max-width: 1600px !important; /* Límite solo en pantallas muy grandes */
+  margin: 0 auto !important;
+  padding: 0 0 40px 0 !important;
+  margin-bottom: 40px !important;
+  text-align: center !important;
+  border-bottom: 1px solid rgba(169, 139, 81, 0.1) !important;
 }
 
-.mt-1 {
-  margin-top: 0.5rem;
+.dashboard-title {
+  font-size: 2.8rem !important;
+  font-weight: 700 !important;
+  background: linear-gradient(45deg, #FFFFFF, #A98B51) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 0 15px 0 !important;
+  letter-spacing: -0.8px !important;
 }
 
-.mt-2 {
-  margin-top: 1rem;
+.dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1.2rem !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+}
+
+/* ✅ FIX 4: KPIs responsive - Se adaptan al ancho disponible */
+.kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px !important;
+  margin-bottom: 50px !important;
+  max-width: 1600px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* ✅ FIX 5: Gráficas que aprovechan el espacio */
+.charts-section {
+  width: 100% !important;
+  max-width: 1600px !important;
+  margin: 0 auto 50px auto !important;
+  overflow: hidden !important;
+}
+
+.charts-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 30px !important;
+  width: 100% !important;
+}
+
+.chart-card {
+  background: linear-gradient(135deg, #263B35, #162C2C) !important;
+  border-radius: 20px !important;
+  padding: 30px !important;
+  border: 1px solid rgba(169, 139, 81, 0.2) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.chart-title {
+  color: #FFFFFF !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 20px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* ✅ FIX 6: Sección de transacciones espaciosa */
+.transaction-section {
+  width: 100% !important;
+  max-width: 1600px !important;
+  margin: 0 auto !important;
+}
+
+.transaction-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 30px !important;
+  padding: 0 0 20px 0 !important;
+  border-bottom: 1px solid rgba(169, 139, 81, 0.1) !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+}
+
+.transaction-title {
+  color: #FFFFFF !important;
+  font-size: 1.7rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.transaction-badge {
+  background: rgba(169, 139, 81, 0.2) !important;
+  color: #A98B51 !important;
+  padding: 6px 16px !important;
+  border-radius: 20px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+}
+
+/* ✅ FIX 7: Transacciones mejoradas */
+.transaction-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px !important;
+  margin-bottom: 12px !important;
+  background: linear-gradient(135deg, #162C2C, #111F20) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(169, 139, 81, 0.1) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  min-height: 80px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.transaction-item:hover {
+  border-color: rgba(169, 139, 81, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.transaction-left {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding-right: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+.transaction-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.transaction-right {
+  flex-shrink: 0 !important;
+  min-width: 140px !important;
+  text-align: right !important;
+}
+
+.transaction-amount {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #A98B51 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+}
+
+.transaction-description {
+  color: #FFFFFF !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 6px 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.transaction-date {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem !important;
+  margin: 0 !important;
+}
+
+.transaction-icon {
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(45deg, rgba(169, 139, 81, 0.2), rgba(169, 139, 81, 0.3)) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* ✅ FIX 8: Botones espaciosos */
+.button-group {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.dashboard-button {
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dashboard-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dashboard-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Recharts tamaño apropiado */
+.recharts-responsive-container {
+  width: 100% !important;
+  height: 320px !important;
+}
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+
+/* Extra Large Desktop: 1400px+ */
+@media (min-width: 1400px) {
+  .dashboard-container {
+    padding: 60px 40px !important;
+    padding-top: 140px !important;
+  }
+  
+  .kpi-grid {
+    gap: 40px !important;
+    margin-bottom: 70px !important;
+  }
+  
+  .charts-grid {
+    gap: 50px !important;
+  }
+  
+  .chart-card {
+    padding: 40px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 380px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 3.2rem !important;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 1.3rem !important;
+  }
+}
+
+/* Large Desktop: 1200px - 1399px */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .dashboard-container {
+    padding: 50px 30px !important;
+    padding-top: 130px !important;
+  }
+  
+  .kpi-grid {
+    gap: 32px !important;
+    margin-bottom: 60px !important;
+  }
+  
+  .charts-grid {
+    gap: 40px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 340px !important;
+  }
+}
+
+/* Standard Desktop: 1024px - 1199px */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .dashboard-container {
+    padding: 40px 25px !important;
+    padding-top: 125px !important;
+  }
+  
+  .kpi-grid {
+    gap: 28px !important;
+  }
+  
+  .charts-grid {
+    gap: 35px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* Tablet: 769px - 1023px */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .dashboard-container {
+    padding: 30px 20px !important;
+    padding-top: 120px !important;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px !important;
+  }
+  
+  .charts-grid {
+    gap: 25px !important;
+  }
+  
+  .chart-card {
+    padding: 25px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 280px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 2.2rem !important;
+  }
+  
+  .transaction-right {
+    min-width: 120px !important;
+  }
+}
+
+/* Mobile: Hasta 768px */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px 15px !important;
+    padding-top: 120px !important;
+  }
+  
+  .dashboard-header {
+    padding: 0 0 25px 0 !important;
+    margin-bottom: 25px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 1.8rem !important;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+    margin-bottom: 30px !important;
+  }
+  
+  .charts-section {
+    margin-bottom: 30px !important;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .chart-card {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+  
+  .chart-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 15px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 220px !important;
+  }
+  
+  .transaction-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    margin-bottom: 25px !important;
+  }
+  
+  .transaction-title {
+    font-size: 1.3rem !important;
+    justify-content: center !important;
+  }
+  
+  .button-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+  
+  .dashboard-button {
+    width: 100% !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+  }
+  
+  /* Transacciones en layout vertical para móvil */
+  .transaction-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 18px !important;
+    min-height: auto !important;
+    gap: 15px !important;
+  }
+  
+  .transaction-left {
+    width: 100% !important;
+    padding-right: 0 !important;
+  }
+  
+  .transaction-right {
+    width: 100% !important;
+    text-align: left !important;
+    min-width: unset !important;
+  }
+  
+  .transaction-amount {
+    font-size: 1.2rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+  
+  .transaction-description {
+    font-size: 1rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+  
+  .transaction-date {
+    font-size: 0.85rem !important;
+  }
+  
+  .transaction-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
+/* Mobile pequeño: Hasta 480px */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 15px 10px !important;
+  }
+  
+  .dashboard-title {
+    font-size: 1.6rem !important;
+  }
+  
+  .transaction-item {
+    padding: 15px !important;
+  }
+  
+  .transaction-amount {
+    font-size: 1.1rem !important;
+  }
+  
+  .chart-card {
+    padding: 15px !important;
+  }
+  
+  .recharts-responsive-container {
+    height: 200px !important;
+  }
+}
+
+/* Modal responsive */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 20px !important;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #263B35, #162C2C) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(169, 139, 81, 0.2) !important;
+  width: 90% !important;
+  max-width: 600px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  padding: 30px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95% !important;
+    padding: 25px !important;
+    max-width: none !important;
+  }
 }
