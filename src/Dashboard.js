@@ -132,7 +132,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
             onMouseOut={(e) => e.target.style.background = 'linear-gradient(45deg, #A98B51, #D4AF37)'}
             title="Editar transacción"
           >
-            ✏️ {!isMobile && "Editar"}
+            {!isMobile && "Editar"}
           </button>
           
           <button 
@@ -1178,7 +1178,7 @@ Tenant: ${payload.tid || 'N/A'}
                 onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
                 onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
               >
-                ✏️ Editar
+                  Editar
               </button>
               <button
                 onClick={() => {
