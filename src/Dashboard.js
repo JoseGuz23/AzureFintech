@@ -110,7 +110,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
             onClick={() => onUpdate(transaction.id, transaction.amount)}
             style={{
               padding: isMobile ? '6px 10px' : '8px 12px',
-              backgroundColor: '#0078d4',
+              background: 'linear-gradient(45deg, #A98B51, #D4AF37)',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
@@ -122,11 +122,11 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
               transition: 'all 0.2s ease',
               fontWeight: '500'
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#005a9e'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
+            onMouseOver={(e) => e.target.style.background = 'linear-gradient(45deg, #8B7541, #B8941F)'}
+            onMouseOut={(e) => e.target.style.background = 'linear-gradient(45deg, #A98B51, #D4AF37)'}
             title="Editar transacción"
           >
-            {!isMobile && "Editar"}
+            ✏️ {!isMobile && "Editar"}
           </button>
           
           <button 
@@ -178,6 +178,9 @@ function Dashboard() {
 
   // ✅ Estado para responsive design
   const [isMobile, setIsMobile] = useState(false);
+
+  // ✅ Estado para expandir/contraer lista de transacciones
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   // ✅ Detectar tamaño de pantalla
   useEffect(() => {
@@ -806,7 +809,7 @@ Tenant: ${payload.tid || 'N/A'}
         ) : (
           <div style={transactionStyles.list}>
             {transactions
-              .slice(-APP_CONFIG.MAX_RECENT_TRANSACTIONS)
+              .slice(showAllTransactions ? 0 : -APP_CONFIG.MAX_RECENT_TRANSACTIONS)
               .reverse()
               .map((transaction, index) => (
                 <ImprovedTransactionItem 
@@ -820,18 +823,42 @@ Tenant: ${payload.tid || 'N/A'}
               ))
             }
             
-            {/* Mostrar indicador si hay más transacciones */}
+            {/* Botón para expandir/contraer cuando hay más transacciones */}
             {transactions.length > APP_CONFIG.MAX_RECENT_TRANSACTIONS && (
-              <div style={{
-                textAlign: 'center',
-                padding: isMobile ? '20px' : '30px',
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: isMobile ? '0.9rem' : '1rem',
-                borderTop: '1px solid rgba(169, 139, 81, 0.1)',
-                marginTop: '20px'
-              }}>
-                Mostrando las últimas {APP_CONFIG.MAX_RECENT_TRANSACTIONS} transacciones de {transactions.length} total
-              </div>
+              <button 
+                onClick={() => setShowAllTransactions(!showAllTransactions)}
+                style={{
+                  width: '100%',
+                  textAlign: 'center',
+                  padding: isMobile ? '16px 20px' : '20px 30px',
+                  color: '#A98B51',
+                  fontSize: isMobile ? '0.95rem' : '1.05rem',
+                  fontWeight: '600',
+                  borderTop: '1px solid rgba(169, 139, 81, 0.2)',
+                  marginTop: '20px',
+                  background: 'linear-gradient(135deg, #162C2C, #263B35)',
+                  border: '1px solid rgba(169, 139, 81, 0.3)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #263B35, #162C2C)';
+                  e.target.style.transform = 'translateY(-2px)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #162C2C, #263B35)';
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                {showAllTransactions ? (
+                  <span>▲ Mostrar menos transacciones</span>
+                ) : (
+                  <span>
+                    ▼ Ver todas las transacciones ({transactions.length - APP_CONFIG.MAX_RECENT_TRANSACTIONS} más)
+                  </span>
+                )}
+              </button>
             )}
           </div>
         )}
