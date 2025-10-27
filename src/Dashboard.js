@@ -66,7 +66,10 @@ const processTransactionsForChart = (transactions) => {
 /**
  * Componente mejorado para mostrar cada transacción
  */
-const ImprovedTransactionItem = ({ transaction, index, isMobile }) => {
+/**
+ * Componente mejorado para mostrar cada transacción
+ */
+const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDelete }) => {
   return (
     <div className="transaction-item">
       <div className="transaction-left">
@@ -80,11 +83,74 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile }) => {
           <p className="transaction-date">
             {HELPERS.formatDate(transaction.timestamp)}
           </p>
+          {transaction.updatedAt && (
+            <p style={{ 
+              fontSize: isMobile ? '0.75rem' : '0.85rem', 
+              color: 'rgba(255, 255, 255, 0.5)',
+              marginTop: '4px'
+            }}>
+              <em>Actualizado: {HELPERS.formatDate(transaction.updatedAt)}</em>
+            </p>
+          )}
         </div>
       </div>
       <div className="transaction-right">
         <div className="transaction-amount">
           {HELPERS.formatMoney(Math.abs(transaction.amount || 0))}
+        </div>
+        
+        {/* Botones de acción */}
+        <div style={{ 
+          display: 'flex', 
+          gap: isMobile ? '6px' : '8px',
+          marginTop: isMobile ? '8px' : '0',
+          marginLeft: isMobile ? '0' : '12px'
+        }}>
+          <button 
+            onClick={() => onUpdate(transaction.id, transaction.amount)}
+            style={{
+              padding: isMobile ? '6px 10px' : '8px 12px',
+              backgroundColor: '#0078d4',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: isMobile ? '12px' : '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s ease',
+              fontWeight: '500'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#005a9e'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
+            title="Editar transacción"
+          >
+            {!isMobile && "Editar"}
+          </button>
+          
+          <button 
+            onClick={() => onDelete(transaction.id, transaction.amount)}
+            style={{
+              padding: isMobile ? '6px 10px' : '8px 12px',
+              backgroundColor: '#d13438',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: isMobile ? '12px' : '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s ease',
+              fontWeight: '500'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#a4262c'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#d13438'}
+            title="Eliminar transacción"
+          >
+            🗑️ {!isMobile && "Eliminar"}
+          </button>
         </div>
       </div>
     </div>
@@ -748,6 +814,8 @@ Tenant: ${payload.tid || 'N/A'}
                   transaction={transaction} 
                   index={index}
                   isMobile={isMobile}
+                  onUpdate={updateTransaction}
+                  onDelete={deleteTransaction}
                 />
               ))
             }
