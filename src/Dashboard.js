@@ -283,6 +283,94 @@ function Dashboard() {
     }
   };
 
+  async function updateTransaction(transactionId, currentAmount) {
+    if (!accounts || accounts.length === 0) {
+      setError(ERROR_MESSAGES.AUTH.NOT_AUTHENTICATED);
+      return;
+    }
+
+    const newAmountStr = prompt(`Actualizar monto de la transacción\n\nMonto actual: $${currentAmount}`, currentAmount);
+    
+    if (!newAmountStr) return;
+    
+    const newAmount = parseFloat(newAmountStr);
+    
+    if (isNaN(newAmount) || newAmount <= 0) {
+      alert("Monto inválido. Debe ser un número positivo.");
+      return;
+    }
+
+    try {
+      const request = { ...loginRequest, account: accounts[0] };
+      const tokenResponse = await instance.acquireTokenSilent(request);
+      
+      const response = await fetch(
+        `${API_CONFIG.getURL(API_CONFIG.ENDPOINTS.TRANSACTIONS)}/${transactionId}`,
+        {
+          method: "PUT",
+          headers: HTTP_HEADERS.withAuth(tokenResponse.accessToken),
+          body: JSON.stringify({
+            amount: newAmount,
+            timestamp: new Date().toISOString()
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      alert(`${result.message}`);
+      
+      await fetchTransactions(tokenResponse.accessToken);
+      
+    } catch (err) {
+      console.error("Error al actualizar:", err);
+      alert(`Error al actualizar: ${err.message}`);
+      setError(`Error al actualizar: ${err.message}`);
+    }
+  }
+
+  async function deleteTransaction(transactionId, amount) {
+    if (!accounts || accounts.length === 0) {
+      setError(ERROR_MESSAGES.AUTH.NOT_AUTHENTICATED);
+      return;
+    }
+
+    if (!window.confirm(`¿Estás seguro de eliminar esta transacción?\n\nMonto: $${amount}\nID: ${transactionId}\n\nEsta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      const request = { ...loginRequest, account: accounts[0] };
+      const tokenResponse = await instance.acquireTokenSilent(request);
+      
+      const response = await fetch(
+        `${API_CONFIG.getURL(API_CONFIG.ENDPOINTS.TRANSACTIONS)}/${transactionId}`,
+        {
+          method: "DELETE",
+          headers: HTTP_HEADERS.withAuth(tokenResponse.accessToken)
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      alert(`${result.message}`);
+      
+      await fetchTransactions(tokenResponse.accessToken);
+      
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+      alert(`Error al eliminar: ${err.message}`);
+      setError(`Error al eliminar: ${err.message}`);
+    }
+  }
   /**
    * Función de debug para mostrar información del token (solo desarrollo)
    */
