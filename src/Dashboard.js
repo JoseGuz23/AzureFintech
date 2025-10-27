@@ -69,9 +69,13 @@ const processTransactionsForChart = (transactions) => {
 /**
  * Componente mejorado para mostrar cada transacción
  */
-const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDelete }) => {
+const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDelete, onClick }) => {
   return (
-    <div className="transaction-item">
+    <div 
+      className="transaction-item"
+      onClick={() => onClick && onClick(transaction)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="transaction-left">
         <div className="transaction-icon">
           <Plus size={isMobile ? 14 : 18} color={colors.primary} />
@@ -105,7 +109,9 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
           gap: isMobile ? '6px' : '8px',
           marginTop: isMobile ? '8px' : '0',
           marginLeft: isMobile ? '0' : '12px'
-        }}>
+        }}
+        onClick={(e) => e.stopPropagation()}
+        >
           <button 
             onClick={() => onUpdate(transaction.id, transaction.amount)}
             style={{
@@ -182,6 +188,9 @@ function Dashboard() {
   // ✅ Estado para expandir/contraer lista de transacciones
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
+  // ✅ Estado para mostrar detalles de transacción
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
   // ✅ Detectar tamaño de pantalla
   useEffect(() => {
     const handleResize = () => {
@@ -215,9 +224,17 @@ function Dashboard() {
       
       const data = await response.json();
       const userTransactions = data.transactions || [];
-      setTransactions(userTransactions);
       
-      HELPERS.debugLog('User transactions loaded', userTransactions.length);
+      // ✅ ORDENAR DE MÁS RECIENTE A MÁS VIEJA
+      const sortedTransactions = userTransactions.sort((a, b) => {
+        const dateA = new Date(a.timestamp || 0);
+        const dateB = new Date(b.timestamp || 0);
+        return dateB - dateA; // Más reciente primero
+      });
+      
+      setTransactions(sortedTransactions);
+      
+      HELPERS.debugLog('User transactions loaded', sortedTransactions.length);
     } catch (err) {
       console.error("Error al obtener transacciones:", err);
       setError(`${ERROR_MESSAGES.TRANSACTION.LOAD_FAILED}: ${err.message}`);
@@ -809,8 +826,7 @@ Tenant: ${payload.tid || 'N/A'}
         ) : (
           <div style={transactionStyles.list}>
             {transactions
-              .slice(showAllTransactions ? 0 : -APP_CONFIG.MAX_RECENT_TRANSACTIONS)
-              .reverse()
+              .slice(0, showAllTransactions ? transactions.length : APP_CONFIG.MAX_RECENT_TRANSACTIONS)
               .map((transaction, index) => (
                 <ImprovedTransactionItem 
                   key={transaction.id || `transaction-${index}`} 
@@ -819,6 +835,7 @@ Tenant: ${payload.tid || 'N/A'}
                   isMobile={isMobile}
                   onUpdate={updateTransaction}
                   onDelete={deleteTransaction}
+                  onClick={setSelectedTransaction}
                 />
               ))
             }
@@ -880,6 +897,314 @@ Tenant: ${payload.tid || 'N/A'}
           onClose={() => setGlobalTransactions(null)}
           isMobile={isMobile}
         />
+      )}
+
+      {/* ✅ Modal de detalles de transacción */}
+      {selectedTransaction && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: isMobile ? '20px' : '0'
+          }}
+          onClick={() => setSelectedTransaction(null)}
+        >
+          <div 
+            style={{
+              background: 'linear-gradient(135deg, #263B35, #162C2C)',
+              padding: isMobile ? '25px' : '35px',
+              borderRadius: '16px',
+              width: isMobile ? '100%' : '500px',
+              maxWidth: '90vw',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              border: '2px solid rgba(169, 139, 81, 0.3)',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: '2px solid #A98B51',
+              paddingBottom: '15px',
+              marginBottom: '25px'
+            }}>
+              <h3 style={{ 
+                color: '#FFFFFF', 
+                margin: 0,
+                fontSize: isMobile ? '1.3rem' : '1.6rem',
+                fontWeight: '600'
+              }}>
+                Detalles de Transacción
+              </h3>
+              <button 
+                onClick={() => setSelectedTransaction(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '2rem',
+                  cursor: 'pointer',
+                  color: '#A98B51',
+                  lineHeight: 1,
+                  padding: '0 5px',
+                  transition: 'color 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.color = '#D4AF37'}
+                onMouseOut={(e) => e.target.style.color = '#A98B51'}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Contenido del modal */}
+            <div style={{ color: '#FFFFFF' }}>
+              {/* ID de transacción */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ 
+                  fontSize: isMobile ? '0.85rem' : '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  display: 'block',
+                  marginBottom: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  fontWeight: '500'
+                }}>
+                  ID de Transacción
+                </label>
+                <div style={{
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  color: '#A98B51',
+                  fontFamily: 'monospace',
+                  background: 'rgba(169, 139, 81, 0.1)',
+                  padding: '12px 15px',
+                  borderRadius: '8px',
+                  wordBreak: 'break-all'
+                }}>
+                  {selectedTransaction.id || 'N/A'}
+                </div>
+              </div>
+
+              {/* Monto */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ 
+                  fontSize: isMobile ? '0.85rem' : '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  display: 'block',
+                  marginBottom: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  fontWeight: '500'
+                }}>
+                  Monto
+                </label>
+                <div style={{
+                  fontSize: isMobile ? '1.8rem' : '2.2rem',
+                  color: selectedTransaction.amount > 0 ? '#28A745' : '#DC3545',
+                  fontWeight: '700',
+                  fontFamily: 'monospace'
+                }}>
+                  {HELPERS.formatMoney(Math.abs(selectedTransaction.amount || 0))}
+                </div>
+              </div>
+
+              {/* Fecha y hora */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ 
+                  fontSize: isMobile ? '0.85rem' : '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  display: 'block',
+                  marginBottom: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  fontWeight: '500'
+                }}>
+                  Fecha y Hora
+                </label>
+                <div style={{
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  color: '#FFFFFF',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  padding: '12px 15px',
+                  borderRadius: '8px'
+                }}>
+                  {HELPERS.formatDate(selectedTransaction.timestamp)}
+                </div>
+              </div>
+
+              {/* Descripción (si existe) */}
+              {selectedTransaction.description && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    display: 'block',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    fontWeight: '500'
+                  }}>
+                    Descripción
+                  </label>
+                  <div style={{
+                    fontSize: isMobile ? '0.95rem' : '1rem',
+                    color: '#FFFFFF',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    padding: '12px 15px',
+                    borderRadius: '8px',
+                    lineHeight: 1.5
+                  }}>
+                    {selectedTransaction.description}
+                  </div>
+                </div>
+              )}
+
+              {/* Destinatario (si existe) */}
+              {selectedTransaction.recipient && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    display: 'block',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    fontWeight: '500'
+                  }}>
+                    Destinatario
+                  </label>
+                  <div style={{
+                    fontSize: isMobile ? '0.95rem' : '1rem',
+                    color: '#FFFFFF',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    padding: '12px 15px',
+                    borderRadius: '8px'
+                  }}>
+                    {selectedTransaction.recipient}
+                  </div>
+                </div>
+              )}
+
+              {/* Fecha de actualización (si existe) */}
+              {selectedTransaction.updatedAt && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    display: 'block',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    fontWeight: '500'
+                  }}>
+                    Última Actualización
+                  </label>
+                  <div style={{
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    padding: '12px 15px',
+                    borderRadius: '8px'
+                  }}>
+                    {HELPERS.formatDate(selectedTransaction.updatedAt)}
+                  </div>
+                </div>
+              )}
+
+              {/* Account ID (si existe) */}
+              {selectedTransaction.accountId && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    display: 'block',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    fontWeight: '500'
+                  }}>
+                    Cuenta
+                  </label>
+                  <div style={{
+                    fontSize: isMobile ? '0.85rem' : '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontFamily: 'monospace',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    padding: '12px 15px',
+                    borderRadius: '8px',
+                    wordBreak: 'break-all'
+                  }}>
+                    {selectedTransaction.accountId}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Botones de acción en el modal */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginTop: '30px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(169, 139, 81, 0.2)'
+            }}>
+              <button
+                onClick={() => {
+                  updateTransaction(selectedTransaction.id, selectedTransaction.amount);
+                  setSelectedTransaction(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: isMobile ? '12px' : '14px',
+                  background: 'linear-gradient(45deg, #A98B51, #D4AF37)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                ✏️ Editar
+              </button>
+              <button
+                onClick={() => {
+                  deleteTransaction(selectedTransaction.id, selectedTransaction.amount);
+                  setSelectedTransaction(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: isMobile ? '12px' : '14px',
+                  background: 'linear-gradient(45deg, #d13438, #a4262c)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: isMobile ? '0.95rem' : '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
