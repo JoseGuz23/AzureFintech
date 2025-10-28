@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -19,11 +21,13 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
   }, []);
 
   const handleLogoClick = () => {
+    navigate('/');
     onNavigate('hub');
     setIsMobileMenuOpen(false);
   };
 
   const handleNavigation = (page) => {
+    navigate(`/${page}`);
     onNavigate(page);
     setIsMobileMenuOpen(false);
   };
@@ -48,18 +52,18 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
       backdropFilter: 'blur(10px)',
       borderBottom: '1px solid rgba(169, 139, 81, 0.2)',
       zIndex: 1000,
-      padding: isMobile ? '15px 0' : '20px 0' // Solo cambio menor para móvil
+      padding: isMobile ? '15px 0' : '20px 0'
     },
     nav: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: isMobile ? '0 20px' : '0 50px', // Solo cambio de padding para móvil
+      padding: isMobile ? '0 20px' : '0 50px',
       maxWidth: '1400px',
       margin: '0 auto'
     },
     logo: {
-      fontSize: isMobile ? '1.5rem' : '1.8rem', // Solo cambio menor para móvil
+      fontSize: isMobile ? '1.5rem' : '1.8rem',
       fontWeight: 700,
       background: 'linear-gradient(45deg, #FFFFFF, #A98B51)',
       WebkitBackgroundClip: 'text',
@@ -68,7 +72,7 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
       cursor: 'pointer'
     },
     navLinks: {
-      display: isMobile ? 'none' : 'flex', // Solo ocultar en móvil
+      display: isMobile ? 'none' : 'flex',
       gap: '30px',
       alignItems: 'center'
     },
@@ -80,7 +84,7 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
       fontSize: '16px',
       transition: 'color 0.3s ease',
       cursor: 'pointer',
-      fontFamily: 'inherit' // MANTENER FUENTE ORIGINAL
+      fontFamily: 'inherit'
     },
     button: {
       padding: '10px 20px',
@@ -103,7 +107,6 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
       fontSize: '14px',
       fontWeight: 600
     },
-    // SOLO ESTILOS NUEVOS PARA MÓVIL
     hamburger: {
       display: isMobile ? 'block' : 'none',
       background: 'none',
@@ -180,14 +183,6 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
       fontWeight: 600,
       width: '100%'
     },
-    userInfo: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '15px',
-      flexDirection: isMobile ? 'column' : 'row',
-      width: isMobile ? '100%' : 'auto',
-      textAlign: 'center'
-    },
     mobileUserInfo: {
       display: 'flex',
       alignItems: 'center',
@@ -198,7 +193,7 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
     }
   };
 
-  // Header para usuarios NO autenticados (MainHub + Architecture)
+  // Header para usuarios NO autenticados
   if (type === 'public') {
     return (
       <header style={headerStyles.header}>
@@ -207,69 +202,35 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
             FINTECH PRO
           </div>
           
-          {/* Menú hamburguesa móvil */}
           <button
             style={headerStyles.hamburger}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Menu"
           >
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen1 : {})
-              }}
-            ></span>
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen2 : {})
-              }}
-            ></span>
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen3 : {})
-              }}
-            ></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen1 : {})}}></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen2 : {})}}></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen3 : {})}}></span>
           </button>
 
-          {/* Navegación desktop - EXACTA COMO ORIGINAL */}
           <div style={headerStyles.navLinks}>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('hub')}>
-              Servicios
-            </button>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('architecture')}>
-              Arquitectura
-            </button>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('hub')}>
-              Casos de Éxito
-            </button>
-            <button style={headerStyles.button} onClick={handleLogin}>
-              Acceder al Sistema
-            </button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('hub')}>Servicios</button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('architecture')}>Arquitectura</button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('hub')}>Casos de Éxito</button>
+            <button style={headerStyles.button} onClick={handleLogin}>Acceder al Sistema</button>
           </div>
 
-          {/* Navegación móvil */}
           <div style={headerStyles.mobileNavLinks}>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('hub')}>
-              Servicios
-            </button>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('architecture')}>
-              Arquitectura
-            </button>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('hub')}>
-              Casos de Éxito
-            </button>
-            <button style={headerStyles.mobileButton} onClick={handleLogin}>
-              Acceder al Sistema
-            </button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('hub')}>Servicios</button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('architecture')}>Arquitectura</button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('hub')}>Casos de Éxito</button>
+            <button style={headerStyles.mobileButton} onClick={handleLogin}>Acceder al Sistema</button>
           </div>
         </nav>
       </header>
     );
   }
 
-  // Header para usuarios AUTENTICADOS (Dashboard) - EXACTO COMO ORIGINAL
+  // Header para usuarios AUTENTICADOS
   if (type === 'authenticated') {
     return (
       <header style={headerStyles.header}>
@@ -278,74 +239,37 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
             FINTECH PRO
           </div>
 
-          {/* Menú hamburguesa móvil */}
           <button
             style={headerStyles.hamburger}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Menu"
           >
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen1 : {})
-              }}
-            ></span>
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen2 : {})
-              }}
-            ></span>
-            <span
-              style={{
-                ...headerStyles.hamburgerLine,
-                ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen3 : {})
-              }}
-            ></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen1 : {})}}></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen2 : {})}}></span>
+            <span style={{...headerStyles.hamburgerLine, ...(isMobileMenuOpen ? headerStyles.hamburgerLineOpen3 : {})}}></span>
           </button>
 
-          {/* Navegación desktop - EXACTA COMO ORIGINAL */}
           <div style={headerStyles.navLinks}>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('dashboard')}>
-              Dashboard
-            </button>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('architecture')}>
-              Arquitectura
-            </button>
-            <button style={headerStyles.navButton} onClick={() => handleNavigation('admin')}>
-              Admin
-            </button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('dashboard')}>Dashboard</button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('architecture')}>Arquitectura</button>
+            <button style={headerStyles.navButton} onClick={() => handleNavigation('admin')}>Admin</button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                 Hola, <span style={{ color: '#A98B51', fontWeight: 600 }}>{userName}</span>
               </span>
-              <button style={headerStyles.logoutButton} onClick={handleLogout}>
-                Cerrar Sesión
-              </button>
+              <button style={headerStyles.logoutButton} onClick={handleLogout}>Cerrar Sesión</button>
             </div>
           </div>
 
-          {/* Navegación móvil */}
           <div style={headerStyles.mobileNavLinks}>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('dashboard')}>
-              Dashboard
-            </button>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('architecture')}>
-              Arquitectura
-            </button>
-            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('admin')}>
-              Admin
-            </button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('dashboard')}>Dashboard</button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('architecture')}>Arquitectura</button>
+            <button style={headerStyles.mobileNavButton} onClick={() => handleNavigation('admin')}>Admin</button>
             <div style={headerStyles.mobileUserInfo}>
-              <span style={{ 
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: '16px'
-              }}>
+              <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px' }}>
                 Hola, <span style={{ color: '#A98B51', fontWeight: 600 }}>{userName}</span>
               </span>
-              <button style={headerStyles.mobileLogoutButton} onClick={handleLogout}>
-                Cerrar Sesión
-              </button>
+              <button style={headerStyles.mobileLogoutButton} onClick={handleLogout}>Cerrar Sesión</button>
             </div>
           </div>
         </nav>

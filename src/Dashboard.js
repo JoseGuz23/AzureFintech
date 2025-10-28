@@ -103,7 +103,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
           {HELPERS.formatMoney(Math.abs(transaction.amount || 0))}
         </div>
         
-        {/* Botones de acción */}
+        {/* Botones de acción CORREGIDOS */}
         <div style={{ 
           display: 'flex', 
           gap: isMobile ? '6px' : '8px',
@@ -112,50 +112,56 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
         }}
         onClick={(e) => e.stopPropagation()}
         >
+          {/* ✅ BOTÓN EDITAR CORREGIDO */}
           <button 
             onClick={() => onUpdate(transaction.id, transaction.amount)}
             style={{
-              padding: isMobile ? '6px 10px' : '8px 12px',
+              padding: isMobile ? '8px 12px' : '8px 12px',
               background: 'linear-gradient(45deg, #A98B51, #D4AF37)',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: isMobile ? '12px' : '13px',
+              fontSize: isMobile ? '13px' : '13px',
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
               transition: 'all 0.2s ease',
-              fontWeight: '500'
+              fontWeight: '500',
+              minWidth: isMobile ? '70px' : 'auto', // ⬅️ ESTO FIJA EL ANCHO MÍNIMO
+              justifyContent: 'center'
             }}
             onMouseOver={(e) => e.target.style.background = 'linear-gradient(45deg, #8B7541, #B8941F)'}
             onMouseOut={(e) => e.target.style.background = 'linear-gradient(45deg, #A98B51, #D4AF37)'}
             title="Editar transacción"
           >
-            {!isMobile && "Editar"}
+            {isMobile ? "Editar" : "Editar"}
           </button>
           
+          {/* ✅ BOTÓN ELIMINAR MEJORADO */}
           <button 
             onClick={() => onDelete(transaction.id, transaction.amount)}
             style={{
-              padding: isMobile ? '6px 10px' : '8px 12px',
+              padding: isMobile ? '8px 12px' : '8px 12px',
               backgroundColor: '#d13438',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: isMobile ? '12px' : '13px',
+              fontSize: isMobile ? '13px' : '13px',
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
               transition: 'all 0.2s ease',
-              fontWeight: '500'
+              fontWeight: '500',
+              minWidth: isMobile ? '90px' : 'auto', // ⬅️ ESTO FIJA EL ANCHO MÍNIMO
+              justifyContent: 'center'
             }}
             onMouseOver={(e) => e.target.style.backgroundColor = '#a4262c'}
             onMouseOut={(e) => e.target.style.backgroundColor = '#d13438'}
             title="Eliminar transacción"
           >
-            🗑️ {!isMobile && "Eliminar"}
+            ✖ Eliminar
           </button>
         </div>
       </div>
@@ -457,29 +463,6 @@ function Dashboard() {
       setError(`Error al eliminar: ${err.message}`);
     }
   }
-  /**
-   * Función de debug para mostrar información del token (solo desarrollo)
-   */
-  const debugToken = () => {
-    if (!ENVIRONMENT.DEBUG.ENABLE_DEBUG_BUTTONS) return;
-    
-    instance.acquireTokenSilent({...loginRequest, account: accounts[0]})
-      .then(tokenResponse => {
-        const payload = JSON.parse(atob(tokenResponse.accessToken.split('.')[1]));
-        HELPERS.debugLog('Token payload', payload);
-        
-        const debugInfo = `
-Usuario: ${payload.name || 'N/A'}
-Email: ${payload.email || payload.preferred_username || 'N/A'}
-ID: ${payload.oid || payload.sub || 'N/A'}
-Roles: ${JSON.stringify(payload.roles || [])}
-Tenant: ${payload.tid || 'N/A'}
-        `.trim();
-        
-        alert(debugInfo);
-      })
-      .catch(console.error);
-  };
 
   // Cálculos de métricas (KPIs)
   const metrics = {
@@ -745,21 +728,6 @@ Tenant: ${payload.tid || 'N/A'}
           
           {/* Grupo de botones de acción */}
           <div className="button-group">
-            {/* Botón de debug (solo en desarrollo) */}
-            {ENVIRONMENT.DEBUG.ENABLE_DEBUG_BUTTONS && (
-              <button 
-                onClick={debugToken} 
-                className="dashboard-button"
-                style={{
-                  background: 'linear-gradient(45deg, #17A2B8, #3FBDCF)',
-                  color: 'white'
-                }}
-                title="Mostrar información del token JWT"
-              >
-                <Eye size={16} />
-                Debug
-              </button>
-            )}
             
             {/* Botón para ver transacciones globales (admin) */}
             <button 
