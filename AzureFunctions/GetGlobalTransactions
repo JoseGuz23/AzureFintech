@@ -1,0 +1,93 @@
+const { DefaultAzureCredential } = require("@azure/identity");
+const { CosmosClient } = require("@azure/cosmos");
+
+const credential = new DefaultAzureCredential();
+const endpoint = process.env.COSMOS_ENDPOINT;
+const client = new CosmosClient({ endpoint, aadCredentials: credential });
+const database = client.database("fintechdb");
+const container = database.container("transactions");
+
+/**
+ * Extrae la identidad del usuario del JWT Bearer token
+ * (APIM ya validó que sea válido)
+ */
+function extractUserFromToken(req) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+        
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64'));
+        
+        return {
+            id: payload.oid || payload.sub || payload.unique_name,
+            name: payload.name || payload.preferred_username,
+            email: payload.email || payload.preferred_username,
+            roles: payload.roles || payload.role || []
+        };
+        
+    } catch (error) {
+        return null;
+    }
+}
+
+module.exports = async function (context, req) {
+    try {
+        // APIM ya validó JWT, solo extraemos el usuario
+        const userInfo = extractUserFromToken(req);
+        if (!userInfo) {
+            context.res = {
+                status: 401,
+                body: { error: "No se pudo extraer información del usuario" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+
+        // Verificar rol de administrador
+        const requiredRole = "Admin.Read.All";
+        const hasAdminRole = Array.isArray(userInfo.roles) && userInfo.roles.includes(requiredRole);
+        
+        if (!hasAdminRole) {
+            context.res = {
+                status: 403,
+                body: { 
+                    error: "Acceso denegado: Se requiere rol de administrador",
+                    requiredRole: requiredRole
+                },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        // Consultar las últimas 100 transacciones globales
+        const querySpec = {
+            query: "SELECT TOP 100 * FROM c ORDER BY c.timestamp DESC"
+        };
+        
+        const { resources: transactions } = await container.items.query(querySpec).fetchAll();
+        
+        context.res = {
+            status: 200,
+            body: {
+                message: "Últimas 100 transacciones globales",
+                count: transactions.length,
+                transactions: transactions,
+                adminName: userInfo.name,
+                timestamp: new Date().toISOString()
+            },
+            headers: { "Content-Type": "application/json" }
+        };
+        
+    } catch (err) {
+        context.log.error("Error al obtener transacciones globales:", err);
+        
+        context.res = {
+            status: 500,
+            body: { error: "Error interno del servidor" },
+            headers: { "Content-Type": "application/json" }
+        };
+    }
+};
