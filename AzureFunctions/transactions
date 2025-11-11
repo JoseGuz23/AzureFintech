@@ -1,0 +1,135 @@
+const { DefaultAzureCredential } = require("@azure/identity");
+const { CosmosClient } = require("@azure/cosmos");
+const { randomUUID } = require("crypto");
+
+const credential = new DefaultAzureCredential();
+const endpoint = process.env.COSMOS_ENDPOINT;
+const client = new CosmosClient({ endpoint, aadCredentials: credential });
+const database = client.database("fintechdb");
+const container = database.container("transactions");
+
+/**
+ * Extrae la identidad del usuario del JWT Bearer token
+ * (APIM ya validó que sea válido)
+ */
+function extractUserFromToken(req) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+        
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64'));
+        
+        return {
+            id: payload.oid || payload.sub || payload.unique_name,
+            name: payload.name || payload.preferred_username,
+            email: payload.email || payload.preferred_username
+        };
+        
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Valida que el monto sea un número positivo válido
+ */
+function validateAmount(amount) {
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0) {
+        throw { status: 400, error: "El monto debe ser un número positivo" };
+    }
+    return parsed;
+}
+
+module.exports = async function (context, req) {
+    try {
+        // APIM ya validó JWT, solo extraemos el usuario
+        const userInfo = extractUserFromToken(req);
+        if (!userInfo) {
+            context.res = {
+                status: 401,
+                body: { error: "No se pudo extraer información del usuario" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+
+        if (req.method === 'GET') {
+            const querySpec = {
+                query: "SELECT * FROM c WHERE c.accountId = @accountId OR c.fromAccountId = @accountId ORDER BY c.timestamp DESC",
+                parameters: [{ name: "@accountId", value: userInfo.id }]
+            };
+
+            const { resources: transactions } = await container.items.query(querySpec).fetchAll();
+
+            context.res = {
+                status: 200,
+                body: { userId: userInfo.id, transactions, count: transactions.length },
+                headers: { "Content-Type": "application/json" }
+            };
+
+        } else if (req.method === 'POST') {
+            const { amount, recipient, description } = req.body || {};
+            
+            if (!amount || !recipient) {
+                context.res = {
+                    status: 400,
+                    body: { error: "amount y recipient son requeridos" },
+                    headers: { "Content-Type": "application/json" }
+                };
+                return;
+            }
+
+            const validatedAmount = validateAmount(amount);
+
+            const newItem = {
+                id: randomUUID(),
+                fromAccountId: userInfo.id,
+                fromAccountName: userInfo.name,
+                fromAccountEmail: userInfo.email,
+                toAccount: recipient,
+                amount: validatedAmount,
+                description: description || `Transferencia a ${recipient}`,
+                timestamp: new Date().toISOString(),
+                type: 'transaction',
+                status: 'completed',
+                accountId: userInfo.id
+            };
+            
+            const { resource } = await container.items.create(newItem);
+            
+            context.res = { 
+                status: 201, 
+                body: { success: true, transaction: resource },
+                headers: { "Content-Type": "application/json" }
+            };
+
+        } else {
+            context.res = {
+                status: 405,
+                body: { error: "Método no permitido" },
+                headers: { "Content-Type": "application/json" }
+            };
+        }
+
+    } catch (err) {
+        let status = 500;
+        let errorMessage = err.message || "Error interno del servidor";
+
+        if (err.status) {
+            status = err.status;
+            errorMessage = err.error || err.message;
+        }
+
+        context.log.error("Error al procesar la solicitud:", err);
+        
+        context.res = {
+            status,
+            body: { error: errorMessage },
+            headers: { "Content-Type": "application/json" }
+        };
+    }
+};
