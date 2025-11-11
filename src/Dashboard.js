@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { Activity, DollarSign, TrendingUp, AlertTriangle, Users, Clock, Plus, Eye } from 'lucide-react';
+import { Activity, DollarSign, TrendingUp, AlertTriangle, Users, Clock, Plus } from 'lucide-react';
 
 // Importaciones centralizadas
 import { 
@@ -11,14 +11,12 @@ import {
   APP_CONFIG, 
   HTTP_HEADERS, 
   ERROR_MESSAGES, 
-  ENVIRONMENT, 
   HELPERS,
   CHART_CONFIG 
 } from './config';
 
 import { 
   transactionStyles, 
-  stateStyles,
   colors 
 } from './styles/theme';
 
@@ -63,12 +61,7 @@ const processTransactionsForChart = (transactions) => {
   return Object.values(hourlyData);
 };
 
-/**
- * Componente mejorado para mostrar cada transacción
- */
-/**
- * Componente mejorado para mostrar cada transacción
- */
+
 const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDelete, onClick }) => {
   return (
     <div 
@@ -103,7 +96,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
           {HELPERS.formatMoney(Math.abs(transaction.amount || 0))}
         </div>
         
-        {/* Botones de acción CORREGIDOS */}
+        {/* nuevos botones */}
         <div style={{ 
           display: 'flex', 
           gap: isMobile ? '6px' : '8px',
@@ -112,7 +105,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
         }}
         onClick={(e) => e.stopPropagation()}
         >
-          {/* ✅ BOTÓN EDITAR CORREGIDO */}
+          {/* BOTÓN EDITAR CORREGIDO */}
           <button 
             onClick={() => onUpdate(transaction.id, transaction.amount)}
             style={{
@@ -138,7 +131,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
             {isMobile ? "Editar" : "Editar"}
           </button>
           
-          {/* ✅ BOTÓN ELIMINAR MEJORADO */}
+          {/*  BOTÓN ELIMINAR */}
           <button 
             onClick={() => onDelete(transaction.id, transaction.amount)}
             style={{
@@ -188,16 +181,16 @@ function Dashboard() {
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
 
-  // ✅ Estado para responsive design
+  //  Estado para responsive design
   const [isMobile, setIsMobile] = useState(false);
 
-  // ✅ Estado para expandir/contraer lista de transacciones
+  //  Estado para expandir/contraer lista de transacciones
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
-  // ✅ Estado para mostrar detalles de transacción
+  //  Estado para mostrar detalles de transacción
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  // ✅ Detectar tamaño de pantalla
+  //  Detectar tamaño de pantalla
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -231,7 +224,7 @@ function Dashboard() {
       const data = await response.json();
       const userTransactions = data.transactions || [];
       
-      // ✅ ORDENAR DE MÁS RECIENTE A MÁS VIEJA
+      //  ORDENAR DE MÁS RECIENTE A MÁS VIEJA
       const sortedTransactions = userTransactions.sort((a, b) => {
         const dateA = new Date(a.timestamp || 0);
         const dateB = new Date(b.timestamp || 0);
@@ -552,7 +545,7 @@ function Dashboard() {
     );
   }
 
-  // ✅ Renderizado principal del dashboard - SIN wrapper problemático
+  //  Renderizado principal del dashboard - SIN wrapper problemático
   return (
     <div className="dashboard-container">
       {/* Encabezado */}
@@ -744,7 +737,7 @@ function Dashboard() {
               {isAdminLoading ? "Cargando..." : "Admin"}
             </button>
             
-            {/* ✅ BOTÓN PRINCIPAL CORREGIDO */}
+            {/*  BOTÓN PRINCIPAL CORREGIDO */}
             <button 
               onClick={() => setShowUACJTransactionModal(true)} 
               className="dashboard-button"
@@ -867,7 +860,7 @@ function Dashboard() {
         />
       )}
 
-      {/* ✅ Modal de detalles de transacción */}
+      {/*  Modal de detalles de transacción */}
       {selectedTransaction && (
         <div 
           style={{

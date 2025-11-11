@@ -1,6 +1,3 @@
-/* ==================== DASHBOARD DESKTOP PROFESIONAL ==================== */
-
-/* ✅ FIX 1: Fuentes del sistema globales - CONSISTENTES */
 * {
   box-sizing: border-box !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -27,7 +24,6 @@ body, html {
   overflow-x: hidden !important;
 }
 
-/* ✅ FIX 2: Layout desktop profesional - SIN wrapper que estorba */
 .dashboard-container {
   margin: 0 auto !important;
   padding: 40px 20px !important;
@@ -40,7 +36,6 @@ body, html {
   overflow-x: hidden !important;
 }
 
-/* ✅ FIX 3: Header responsive mejorado */
 .dashboard-header {
   width: 100% !important;
   padding: 0 0 40px 0 !important;
@@ -67,7 +62,6 @@ body, html {
   font-weight: 400 !important;
 }
 
-/* ✅ FIX 4: KPIs más espaciosos en desktop */
 .kpi-grid {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
@@ -75,7 +69,6 @@ body, html {
   margin-bottom: 50px !important;
 }
 
-/* ✅ FIX 5: Gráficas más grandes y espaciosas */
 .charts-section {
   width: 100% !important;
   overflow: hidden !important;
@@ -101,7 +94,7 @@ body, html {
 }
 
 .chart-title {
-  color: #FFFFFF !important; /* ✅ FIJO: Títulos blancos */
+  color: #FFFFFF !important; 
   font-size: 1.2rem !important;
   font-weight: 600 !important;
   margin: 0 0 20px 0 !important;
@@ -110,7 +103,7 @@ body, html {
   gap: 10px !important;
 }
 
-/* ✅ FIX 6: Transacciones mejoradas */
+
 .transaction-item {
   display: flex !important;
   justify-content: space-between !important;
@@ -192,7 +185,6 @@ body, html {
   flex-shrink: 0 !important;
 }
 
-/* ✅ FIX 7: Header de transacciones más espacioso */
 .transaction-header {
   display: flex !important;
   justify-content: space-between !important;
@@ -257,7 +249,7 @@ body, html {
   transform: none !important;
 }
 
-/* ✅ FIX 8: Modal más grande */
+
 .modal-overlay {
   position: fixed !important;
   top: 0 !important;
@@ -284,15 +276,12 @@ body, html {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* ✅ FIX 9: Recharts más grandes */
 .recharts-responsive-container {
   width: 100% !important;
   height: 320px !important;
 }
 
 /* ==================== RESPONSIVE BREAKPOINTS ==================== */
-
-/* Large Desktop: 1200px+ */
 @media (min-width: 1200px) {
   .dashboard-container {
     padding: 60px 40px !important;
@@ -507,9 +496,9 @@ body, html {
     padding: 20px !important;
   }
 }
-/* ==================== DASHBOARD ANCHO COMPLETO ==================== */
+/* ==================== DASHBOARD COMPLETO ==================== */
 
-/* ✅ FIX 1: Fuentes del sistema globales */
+
 * {
   box-sizing: border-box !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -536,12 +525,12 @@ body, html {
   overflow-x: hidden !important;
 }
 
-/* ✅ FIX 2: Dashboard ANCHO COMPLETO - Sin limitaciones */
+
 .dashboard-container {
   margin: 0 auto !important;
   padding: 40px 20px !important;
   padding-top: 120px !important; /* Espacio para header fijo */
-  max-width: none !important; /* ✅ ELIMINADO: Sin límite de ancho */
+  max-width: none !important; 
   width: 100% !important;
   min-height: 100vh !important;
   background: transparent !important; /* El fondo ya lo maneja App.js */
@@ -549,7 +538,7 @@ body, html {
   overflow-x: hidden !important;
 }
 
-/* ✅ FIX 3: Header responsive y espacioso */
+
 .dashboard-header {
   width: 100% !important;
   max-width: 1600px !important; /* Límite solo en pantallas muy grandes */
@@ -578,7 +567,7 @@ body, html {
   font-weight: 400 !important;
 }
 
-/* ✅ FIX 4: KPIs responsive - Se adaptan al ancho disponible */
+
 .kpi-grid {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
@@ -589,7 +578,7 @@ body, html {
   margin-right: auto !important;
 }
 
-/* ✅ FIX 5: Gráficas que aprovechan el espacio */
+
 .charts-section {
   width: 100% !important;
   max-width: 1600px !important;
@@ -625,7 +614,7 @@ body, html {
   gap: 12px !important;
 }
 
-/* ✅ FIX 6: Sección de transacciones espaciosa */
+
 .transaction-section {
   width: 100% !important;
   max-width: 1600px !important;
@@ -662,7 +651,7 @@ body, html {
   font-weight: 600 !important;
 }
 
-/* ✅ FIX 7: Transacciones mejoradas */
+
 .transaction-item {
   display: flex !important;
   justify-content: space-between !important;
@@ -743,7 +732,7 @@ body, html {
   flex-shrink: 0 !important;
 }
 
-/* ✅ FIX 8: Botones espaciosos */
+
 .button-group {
   display: flex !important;
   gap: 12px !important;

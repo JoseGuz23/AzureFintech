@@ -42,7 +42,6 @@ const Header = ({ type, onNavigate, onLogin, onLogout, userName }) => {
     setIsMobileMenuOpen(false);
   };
 
-  // ESTILOS ORIGINALES EXACTOS - NO CAMBIAR
   const headerStyles = {
     header: {
       position: 'fixed',
