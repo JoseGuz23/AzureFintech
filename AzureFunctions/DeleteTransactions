@@ -1,0 +1,118 @@
+const { DefaultAzureCredential } = require("@azure/identity");
+const { CosmosClient } = require("@azure/cosmos");
+
+const credential = new DefaultAzureCredential();
+const endpoint = process.env.COSMOS_ENDPOINT;
+const client = new CosmosClient({ endpoint, aadCredentials: credential });
+const database = client.database("fintechdb");
+const container = database.container("transactions");
+
+/**
+ * Extrae la identidad del usuario del JWT Bearer token
+ * (APIM ya validó que sea válido)
+ */
+function extractUserFromToken(req) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+        
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64'));
+        
+        return {
+            id: payload.oid || payload.sub || payload.unique_name,
+            name: payload.name || payload.preferred_username,
+            email: payload.email || payload.preferred_username
+        };
+        
+    } catch (error) {
+        return null;
+    }
+}
+
+module.exports = async function (context, req) {
+    try {
+        // APIM ya validó JWT, solo extraemos el usuario
+        const userInfo = extractUserFromToken(req);
+        if (!userInfo) {
+            context.res = {
+                status: 401,
+                body: { error: "No se pudo extraer información del usuario" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+
+        const transactionId = req.params.id || req.query.id;
+        
+        if (!transactionId) {
+            context.res = {
+                status: 400,
+                body: { error: "Se requiere el ID de la transacción" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        // Buscar la transacción
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.id = @id",
+            parameters: [{ name: "@id", value: transactionId }]
+        };
+        
+        const { resources: items } = await container.items.query(querySpec).fetchAll();
+        
+        if (!items || items.length === 0) {
+            context.res = {
+                status: 404,
+                body: { error: "Transacción no encontrada" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        const transaction = items[0];
+        
+        // Validar que sea el dueño de la transacción
+        if (transaction.accountId !== userInfo.id && transaction.fromAccountId !== userInfo.id) {
+            context.res = {
+                status: 403,
+                body: { error: "No tienes permiso para eliminar esta transacción" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        // Eliminar transacción
+        const partitionKeyValue = transaction.accountId;
+        await container.item(transaction.id, partitionKeyValue).delete();
+        
+        context.res = {
+            status: 200,
+            body: { 
+                message: "Transacción eliminada exitosamente",
+                deletedId: transactionId
+            },
+            headers: { "Content-Type": "application/json" }
+        };
+        
+    } catch (err) {
+        let status = 500;
+        let errorMessage = err.message || "Error interno del servidor";
+
+        if (err.status) {
+            status = err.status;
+            errorMessage = err.error || err.message;
+        }
+
+        context.log.error("Error al eliminar transacción:", err);
+        
+        context.res = {
+            status,
+            body: { error: errorMessage },
+            headers: { "Content-Type": "application/json" }
+        };
+    }
+};
