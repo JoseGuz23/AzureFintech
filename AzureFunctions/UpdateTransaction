@@ -1,0 +1,157 @@
+const { DefaultAzureCredential } = require("@azure/identity");
+const { CosmosClient } = require("@azure/cosmos");
+
+const credential = new DefaultAzureCredential();
+const endpoint = process.env.COSMOS_ENDPOINT;
+const client = new CosmosClient({ endpoint, aadCredentials: credential });
+const database = client.database("fintechdb");
+const container = database.container("transactions");
+
+/**
+ * Extrae la identidad del usuario del JWT Bearer token
+ * (APIM ya validó que sea válido)
+ */
+function extractUserFromToken(req) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+        
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64'));
+        
+        return {
+            id: payload.oid || payload.sub || payload.unique_name,
+            name: payload.name || payload.preferred_username,
+            email: payload.email || payload.preferred_username
+        };
+        
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Valida que el monto sea un número positivo válido
+ */
+function validateAmount(amount) {
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0) {
+        throw { status: 400, error: "El monto debe ser un número positivo" };
+    }
+    return parsed;
+}
+
+module.exports = async function (context, req) {
+    try {
+        // APIM ya validó JWT, solo extraemos el usuario
+        const userInfo = extractUserFromToken(req);
+        if (!userInfo) {
+            context.res = {
+                status: 401,
+                body: { error: "No se pudo extraer información del usuario" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+
+        // Obtener ID de la transacción
+        const transactionId = req.params.id || req.query.id;
+        
+        if (!transactionId) {
+            context.res = {
+                status: 400,
+                body: { error: "Se requiere el ID de la transacción" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        const { amount, timestamp } = req.body || {};
+        
+        // Validar que haya al menos un campo para actualizar
+        if (!amount && !timestamp) {
+            context.res = {
+                status: 400,
+                body: { error: "Debe proporcionar amount o timestamp para actualizar" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        // Buscar la transacción
+        const querySpec = {
+            query: "SELECT * FROM c WHERE c.id = @id",
+            parameters: [{ name: "@id", value: transactionId }]
+        };
+        
+        const { resources: items } = await container.items.query(querySpec).fetchAll();
+        
+        if (!items || items.length === 0) {
+            context.res = {
+                status: 404,
+                body: { error: "Transacción no encontrada" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        const transaction = items[0];
+        
+        // Validar autorización: solo el dueño puede actualizar
+        if (transaction.accountId !== userInfo.id && transaction.fromAccountId !== userInfo.id) {
+            context.res = {
+                status: 403,
+                body: { error: "No tienes permiso para actualizar esta transacción" },
+                headers: { "Content-Type": "application/json" }
+            };
+            return;
+        }
+        
+        // Validar y actualizar amount si se proporciona
+        if (amount) {
+            transaction.amount = validateAmount(amount);
+        }
+        
+        // Actualizar timestamp si se proporciona
+        if (timestamp) {
+            transaction.timestamp = timestamp;
+        }
+        
+        // Registrar cuándo se actualizó
+        transaction.updatedAt = new Date().toISOString();
+        
+        // Guardar cambios en Cosmos DB
+        const partitionKeyValue = transaction.accountId;
+        const { resource: updated } = await container
+            .item(transaction.id, partitionKeyValue)
+            .replace(transaction);
+        
+        context.res = {
+            status: 200,
+            body: { 
+                message: "Transacción actualizada exitosamente",
+                transaction: updated
+            },
+            headers: { "Content-Type": "application/json" }
+        };
+        
+    } catch (err) {
+        let status = 500;
+        let errorMessage = err.message || "Error interno del servidor";
+
+        if (err.status) {
+            status = err.status;
+            errorMessage = err.error || err.message;
+        }
+
+        context.log.error("Error al actualizar transacción:", err);
+        
+        context.res = {
+            status,
+            body: { error: errorMessage },
+            headers: { "Content-Type": "application/json" }
+        };
+    }
+};
