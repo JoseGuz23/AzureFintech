@@ -121,7 +121,7 @@ const ImprovedTransactionItem = ({ transaction, index, isMobile, onUpdate, onDel
               gap: '4px',
               transition: 'all 0.2s ease',
               fontWeight: '500',
-              minWidth: isMobile ? '70px' : 'auto', // ⬅️ ESTO FIJA EL ANCHO MÍNIMO
+              minWidth: isMobile ? '70px' : 'auto', // ⬅ESTO FIJA EL ANCHO MÍNIMO
               justifyContent: 'center'
             }}
             onMouseOver={(e) => e.target.style.background = 'linear-gradient(45deg, #8B7541, #B8941F)'}
@@ -232,6 +232,7 @@ function Dashboard() {
       });
       
       setTransactions(sortedTransactions);
+      saveCacheTransactions(sortedTransactions);
       
       HELPERS.debugLog('User transactions loaded', sortedTransactions.length);
     } catch (err) {
@@ -243,7 +244,52 @@ function Dashboard() {
   /**
    * Carga inicial de datos del usuario
    */
-  const loadInitialData = useCallback(async () => {
+  const getCachedTransactions = () => {
+    try {
+      console.log('🔍 Verificando caché...');
+      const cachedData = localStorage.getItem('transactionsCache');
+      const cacheTime = localStorage.getItem('transactionsCacheTime');
+      
+      console.log('Datos en caché?', !!cachedData);
+      console.log('Tiempo guardado?', !!cacheTime);
+      
+      if (!cachedData || !cacheTime) {
+        console.log('❌ No hay caché guardado');
+        return null;
+      }
+      
+      const now = Date.now();
+      const timePassed = now - parseInt(cacheTime);
+      const fiveMinutesInMs = 30 * 60 * 1000;
+      
+      console.log('Tiempo pasado desde caché:', (timePassed / 1000 / 60).toFixed(2), 'minutos');
+      
+      if (timePassed > fiveMinutesInMs) {
+        console.log('⏰ Caché expirado');
+        return null;
+      }
+      
+      const transactions = JSON.parse(cachedData);
+      console.log('Caché VÁLIDO - ' + transactions.length + ' transacciones');
+      return transactions;
+      
+    } catch (err) {
+      console.error('Error leyendo caché:', err);
+      return null;
+    }
+  };
+
+  // Guardar transacciones en el caché
+  const saveCacheTransactions = (transactionsToSave) => {
+    try {
+      localStorage.setItem('transactionsCache', JSON.stringify(transactionsToSave));
+      localStorage.setItem('transactionsCacheTime', Date.now().toString());
+    } catch (err) {
+      console.error('Error guardando caché:', err);
+    }
+  };
+
+   const loadInitialData = useCallback(async () => {
     if (!accounts || accounts.length === 0) return;
     
     setLoading(true);
@@ -253,20 +299,27 @@ function Dashboard() {
       const request = { ...loginRequest, account: accounts[0] };
       const tokenResponse = await instance.acquireTokenSilent(request);
       
-      // Extraer información del usuario del token
       setUserInfo({
         name: tokenResponse.account.name || tokenResponse.account.username,
         id: tokenResponse.account.localAccountId,
         email: tokenResponse.account.username
       });
 
-      // Cargar transacciones del usuario
-      await fetchTransactions(tokenResponse.accessToken);
+      const cachedTransactions = getCachedTransactions();
+      
+      if (cachedTransactions) {
+        setTransactions(cachedTransactions);
+        setLoading(false);
+        // Actualiza en background
+        fetchTransactions(tokenResponse.accessToken);
+      } else {
+        await fetchTransactions(tokenResponse.accessToken);
+        setLoading(false);
+      }
       
     } catch (err) {
       console.error("Error al cargar datos iniciales:", err);
       setError(ERROR_MESSAGES.NETWORK.CONNECTION_FAILED);
-    } finally {
       setLoading(false);
     }
   }, [accounts, instance, fetchTransactions]);
@@ -275,7 +328,29 @@ function Dashboard() {
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
+  
+  useEffect(() => {
+      const keepAliveTimer = setInterval(async () => {
+        try {
+          if (accounts && accounts.length > 0 && userInfo) {
+            const request = { ...loginRequest, account: accounts[0] };
+            const tokenResponse = await instance.acquireTokenSilent(request);
+            
+            // Ping silencioso cada 5 minutos
+            fetch(API_CONFIG.getURL(API_CONFIG.ENDPOINTS.TRANSACTIONS), {
+              method: "GET",
+              headers: HTTP_HEADERS.withAuth(tokenResponse.accessToken)
+            }).catch(() => {}); // Ignora errores
+            
+            console.log('Keep-alive: Función Azure mantenida caliente');
+          }
+        } catch (err) {
+          // Silent fail
+        }
+      }, 2 * 60 * 1000); // Cada 2 minutos
 
+      return () => clearInterval(keepAliveTimer);
+  }, [accounts, instance, userInfo]);
   /**
    * Crea una nueva transacción UACJ
    */
